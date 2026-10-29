@@ -7,10 +7,12 @@
   <meta name="description" content="Soy Chas. Mis viajes, mi gente y las historias que quiero guardar. Un álbum que empezó con un cumpleaños.">
   <title>Chas · Mi álbum de recuerdos</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/photos.js" defer></script>
   <script src="js/app.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" defer></script>
   <script src="js/supabase-client.js" defer></script>
   <script src="js/messages.js" defer></script>
+  <script src="js/photo-comments.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#inicio">Saltar al contenido</a>
@@ -35,7 +37,7 @@
         <p class="handwritten hero-hand">Pasa, estás en mi álbum. <span aria-hidden="true">♡</span></p>
       </div>
       <div class="hero-portrait">
-        <button class="photo-print hero-photo hero-photo-main" data-photo="sunny-smile" aria-label="Ver foto: una sonrisa al sol"><span class="tape" aria-hidden="true"></span><img src="assets/images/chas/WhatsApp%20Image%202026-10-29%20at%2015.02.07%20(2).jpeg" alt="Chas sonriendo al sol, con chaqueta de cuero" width="1536" height="2048" fetchpriority="high"><span>sí, esa soy yo ♡</span></button>
+        <button class="photo-print hero-photo hero-photo-main" data-photo="chas-memory-001" aria-label="Ver foto: una sonrisa al sol"><span class="tape" aria-hidden="true"></span><img src="assets/images/chas/WhatsApp%20Image%202026-10-29%20at%2015.02.07%20(2).jpeg" alt="Chas sonriendo al sol, con chaqueta de cuero" width="1536" height="2048" fetchpriority="high"><span>sí, esa soy yo ♡</span></button>
         <span class="handwritten portrait-note" aria-hidden="true">un recuerdo a la vez</span>
       </div>
       <a href="#muy-chas" class="hero-bottom">MIS HISTORIAS, MEJOR EN COMPAÑÍA <span aria-hidden="true">↓</span></a>
@@ -47,7 +49,7 @@
       <div class="about-heading"><p class="eyebrow">01 / UN POQUITO SOBRE MÍ</p><h2 id="about-title">Muy, <em>muy Chas.</em></h2><p>Tengo varias versiones. Todas vienen con algo que contar.</p></div>
       <div class="personality-notes">
         <article class="personality-note note-gold"><span class="note-icon" aria-hidden="true">✺</span><h3>Siempre me apunto a otro plan</h3><p>Me gusta viajar, salir a bailar y conocer gente.<br>Después, ya veremos qué fotos salen.</p><span class="handwritten">¿vamos? vamos.</span></article>
-        <article class="personality-note note-paper"><span class="note-icon" aria-hidden="true">⌑</span><h3>Déjame leer un capítulo más</h3><p>También me quedo con un libro, algo rico<br>y un ratito sin mirar la hora.</p><a class="note-link" href="#album" data-show-photo="book-cafe">Acá está la prueba <span aria-hidden="true">↗</span></a></article>
+        <article class="personality-note note-paper"><span class="note-icon" aria-hidden="true">⌑</span><h3>Déjame leer un capítulo más</h3><p>También me quedo con un libro, algo rico<br>y un ratito sin mirar la hora.</p><a class="note-link" href="#album" data-show-photo="chas-memory-004">Acá está la prueba <span aria-hidden="true">↗</span></a></article>
         <article class="personality-note note-teal"><span class="note-icon" aria-hidden="true">♡</span><h3>Con mi gente, mejor</h3><p>Mis amigos, Juanse y mi Perú.<br>Los llevo conmigo, esté donde esté.</p><span class="handwritten">cerquita, incluso de lejos</span></article>
       </div>
       <p class="about-footnote"><span aria-hidden="true">◉</span> Y sí: me encantan el vóley, los disfraces y la comida de mi Perú.</p>
@@ -87,11 +89,34 @@
       </div>
     </section>
   </main>
-  <footer class="site-footer section-shell"><a class="brand" href="#inicio">el álbum de <strong>Chas</strong><span class="brand-dot">.</span></a><p>Mis recuerdos favoritos siempre tienen buena compañía.</p><span class="footer-stitch" aria-hidden="true">╱╲╱╲╱╲</span><small class="site-credit">Hecho con ayuda de: Juanse, Miguel, Seba y Joel</small></footer>
+  <footer class="site-footer section-shell"><a class="brand" href="#inicio">el álbum de <strong>Chas</strong><span class="brand-dot">.</span></a><p>Mis recuerdos favoritos siempre tienen buena compañía.</p><span class="footer-stitch" aria-hidden="true">╱╲╱╲╱╲</span><small class="site-credit">Hecho con ayuda de: Juanse, Miguel, Ale, Seba y Joel</small></footer>
   <div class="confetti-layer" id="confetti" aria-hidden="true"></div>
   <p class="sr-only" role="status" id="celebration-status"></p>
 
-  <dialog id="photo-dialog" class="photo-dialog" aria-labelledby="detail-title"><div class="detail-layout"><div class="detail-image-wrap"><img id="detail-image" alt=""><div class="detail-image-controls"><button class="round-button" id="previous-photo" aria-label="Foto anterior">←</button><span id="detail-position" aria-live="polite" aria-atomic="true"></span><button class="round-button" id="next-photo" aria-label="Foto siguiente">→</button></div></div><div class="detail-copy"><button class="round-button close-dialog" data-close aria-label="Cerrar detalle">×</button><p class="eyebrow">UNA PÁGINA DE MI ÁLBUM</p><h2 id="detail-title"></h2><p id="detail-caption"></p><span class="context-tag">Esta foto necesita contexto…</span><div class="detail-comments"><h3>¿Me ayudas con el contexto?</h3><p>Pronto podrás contarme tu versión de este recuerdo por aquí.</p><form id="context-form"><label for="context-text">Prueba una nota para esta foto</label><textarea id="context-text" maxlength="500" rows="3" placeholder="Lo que no se ve en la foto…" required></textarea><button class="text-button" type="submit">Ver mi nota de prueba ↗</button></form><div id="context-preview" class="context-preview" hidden aria-live="polite"></div><p class="form-note">Vista previa local. No se publica ni se guarda.</p></div></div></div></dialog>
+  <dialog id="photo-dialog" class="photo-dialog" aria-labelledby="detail-title">
+    <div class="detail-layout">
+      <div class="detail-image-wrap"><img id="detail-image" alt=""><div class="detail-image-controls"><button class="round-button" id="previous-photo" aria-label="Foto anterior">←</button><span id="detail-position" aria-live="polite" aria-atomic="true"></span><button class="round-button" id="next-photo" aria-label="Foto siguiente">→</button></div></div>
+      <div class="detail-copy" id="detail-content">
+        <button class="round-button close-dialog" data-close aria-label="Cerrar detalle">×</button>
+        <p class="eyebrow">UNA PÁGINA DE MI ÁLBUM</p><h2 id="detail-title"></h2><p id="detail-caption"></p>
+        <span class="context-tag" id="photo-context-tag">Esta foto necesita contexto…</span>
+        <div class="detail-comments">
+          <div class="comments-heading"><h3 id="comments-title">¿Me ayudas con el contexto?</h3><button id="comments-refresh" class="text-button" type="button">Actualizar ↻</button></div>
+          <p id="comments-status" class="message-status" role="status" aria-live="polite" aria-atomic="true"></p>
+          <div id="comments-list" class="comments-list" aria-labelledby="comments-title"></div>
+          <button id="comments-more" class="text-button" type="button" hidden>Leer más comentarios ↓</button>
+          <form id="comment-form" novalidate>
+            <label for="comment-content">Cuéntame tu versión</label>
+            <textarea id="comment-content" name="content" maxlength="1000" rows="3" placeholder="Lo que no se ve en la foto…" aria-describedby="comment-help comment-status" required></textarea>
+            <div class="signature-row"><label for="comment-name">Con cariño,<input id="comment-name" name="name" maxlength="50" placeholder="Tu nombre" autocomplete="given-name" aria-describedby="comment-help comment-status" required></label><label class="checkbox-label"><input id="comment-anonymous" name="is_anonymous" type="checkbox"> Sin nombre</label></div>
+            <p class="form-note" id="comment-help">Escribe tu nombre o marca “Sin nombre”. Hasta 1000 caracteres; nombre: hasta 50. Tu comentario será público en este recuerdo.</p>
+            <button id="comment-submit" class="button button-dark" type="submit" disabled>Guardar mi comentario ↗</button>
+            <p id="comment-status" class="message-status" role="status" aria-live="polite" aria-atomic="true"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </dialog>
 
   <dialog id="contribute-dialog" class="contribute-dialog" aria-labelledby="add-title"><button class="round-button close-dialog" data-close aria-label="Cerrar opciones para sumar">×</button><p class="eyebrow">HAY MÁS DE UNA FORMA DE ESTAR</p><h2 id="add-title">¿Sumas tu <em>pedacito?</em></h2><p class="add-description">Quiero guardar también tu parte de la historia.</p><p class="preview-banner"><strong>Estoy preparando este rincón.</strong> Puedes explorar las opciones. Todavía no se graba, se sube ni se guarda nada.</p><div class="contribution-options" role="group" aria-label="Tipos de aportación"><button data-kind="photo" aria-pressed="true" class="selected"><span aria-hidden="true">▧</span>Una foto</button><button data-kind="memory" aria-pressed="false"><span aria-hidden="true">✎</span>Un recuerdo</button><button data-kind="audio" aria-pressed="false"><span aria-hidden="true">♬</span>Un audio</button><button data-kind="gossip" aria-pressed="false"><span aria-hidden="true">☏</span>Un chisme</button></div><div class="contribution-preview" id="contribution-preview" role="status" aria-live="polite"></div><button class="button button-dark" data-close>Me quedo explorando el álbum <span aria-hidden="true">↗</span></button></dialog>
 </body>

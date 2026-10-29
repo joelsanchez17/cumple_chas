@@ -35,7 +35,10 @@ No dependency installation is needed:
 
 ```sh
 node tests/messages.test.cjs
+node tests/photo-comments.test.cjs
 node --check js/app.js
+node --check js/photos.js
+node --check js/photo-comments.js
 node --check js/messages.js
 node --check js/supabase-client.js
 git diff --check
@@ -43,4 +46,27 @@ git diff --check
 
 The automated tests cover message validation, named/anonymous payloads, submission locking, form reset, list refresh and pagination, network/read/insert failures, timeout handling, stale read protection and rendering user text safely. They use a small DOM fixture rather than a browser layout engine.
 
-Photo uploads, photo comments, audio and other contribution flows remain frontend previews. No Netlify configuration is included.
+## Photo comments / context
+
+Photo data lives in `js/photos.js`. Every seed photo has an explicit permanent application ID, `chas-memory-001` through `chas-memory-019`. IDs are written into each record, never calculated from position, displayed gallery number or filename. Preserve the ID when reordering or changing an image path. Never reuse an existing ID for a different memory. Future guest photos must get new permanent IDs. The tests lock down the seed ID-to-photo mapping.
+
+`js/app.js` keeps the existing modal, titles, captions, gallery filters and previous/next navigation. It sets the selected photo ID and emits `memory:change`. `js/photo-comments.js` handles the conversation and keeps unsent drafts separate for each photo, in memory until the page reloads. Navigation and close/reopen retain drafts. Late reads and writes cannot overwrite another photo's content or draft.
+
+The `chasPhotoCommentsApi` adapter in `js/supabase-client.js` reuses the same Supabase client and publishable configuration as birthday messages:
+
+- SELECT from `public.photo_comments`, filtered with `.eq('photo_id', photoId)`, newest first, in pages of 50. Database IDs are not displayed.
+- INSERT only `photo_id`, `name`, `content`, `is_anonymous`. A named comment needs a nonblank name; anonymous comments use `name: null` and `is_anonymous: true`.
+- No UPDATE/DELETE operations or changes to RLS. A successful insert is followed by a separate refresh, so a failed refresh cannot be mistaken for a failed save.
+
+To test locally:
+
+1. Start the server above, open http://localhost:8000/#album, and select a photo. Check its large image, caption, honest empty state or existing comments, and previous/next buttons. On mobile the existing modal fills the screen.
+2. Add a comment and a name. After sending, the form clears, success appears and comments refresh immediately. Reload and reopen that photo to verify persistence.
+3. Open another photo: its comments must be separate. Try an anonymous comment; it should display **Anónimo**. Blank text or a missing name without **Sin nombre** must not submit.
+4. In browser developer tools, inspect the `/rest/v1/photo_comments` request: the filter must contain the permanent `chas-memory-…` ID, never the filename. The POST body must contain that same `photo_id`.
+5. Switch offline or block the comments endpoint and submit. The draft should survive the failure and navigation to another photo and back. Unblock requests, use **Actualizar**, and check the list before resending if the response was lost.
+6. Move between photos quickly while requests are pending. Comments and drafts must stay attached to their own photo. Verify the existing **Para Chas** messages still load and submit normally.
+
+Manual submissions are real public comments. Automated tests use mocks and do not write to Supabase. Comment tests cover permanent IDs, modal navigation, scoped reads, named/anonymous validation, safe rendering, successful and failed inserts, per-photo drafts, read retries, stale responses and navigating during a pending submission. Existing message tests remain unchanged.
+
+Photo uploads, audio and other contribution flows remain frontend previews. No Netlify configuration is included.

@@ -50,4 +50,19 @@
       return request((db) => db.from('messages').insert({ name, content, is_anonymous }));
     },
   });
+  // Photo comments share the exact same client, public key and timeout handling.
+  window.chasPhotoCommentsApi = Object.freeze({
+    pageSize: PAGE_SIZE,
+    read(photoId, offset = 0) {
+      return request((db) => db.from('photo_comments')
+        .select('photo_id,name,content,is_anonymous,created_at')
+        .eq('photo_id', photoId)
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1));
+    },
+    create({ photo_id, name, content, is_anonymous }) {
+      return request((db) => db.from('photo_comments').insert({ photo_id, name, content, is_anonymous }));
+    },
+  });
 })();

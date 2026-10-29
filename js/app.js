@@ -1,33 +1,6 @@
 'use strict';
 
-// Stable IDs belong to memories, independently of their source filenames.
-// A future data adapter can merge guest memories into this same collection.
-const photoSource = 'assets/images/chas/';
-const memory = (id, file, title, description, tags, extra = {}) => ({
-  id, src: photoSource + encodeURIComponent(`WhatsApp Image 2026-10-29 at ${file}.jpeg`),
-  title, description, tags, origin: 'seed', ...extra,
-});
-const memories = [
-  memory('sunny-smile', '15.02.07 (2)', 'Una sonrisa al sol', 'Yo, al sol, con mi chaqueta de cuero y una sonrisa que casi no cabe en la foto.', ['everyday']),
-  memory('colorful-wigs', '14.01.29_7', 'Las pelucas tienen historia', 'Yo con peluca roja, en buena compañía. La violeta y las gafas de corazón también merecen su explicación.', ['costumes', 'friends']),
-  memory('umbrella-street', '14.00.36', 'Debajo de mil colores', 'Yo, un vaso verde y un techo de paraguas de colores. El paseo ya tenía su propia decoración.', ['travel', 'everyday'], { position: 'center 65%' }),
-  memory('book-cafe', '15.02.06 (2)', 'Un capítulo y algo rico', 'Mi libro abierto, algo rico en la mesa y yo haciendo una pausa entre páginas.', ['everyday']),
-  memory('arms-open', '14.00.36_3', 'Así, con los brazos abiertos', 'Yo con los brazos abiertos y los ojos cerrados, disfrutando un ratito en plena calle.', ['everyday']),
-  memory('louvre-night', '15.02.07 (4)', 'La noche también se pasea', 'Mi foto frente a la pirámide del Louvre. Las manos salieron movidas; la intención se entiende.', ['travel']),
-  memory('costume-crew', '15.02.07 (7)', 'El reparto completo', 'Acá estoy con cinco personas más y unos cuantos disfraces. Hay bastante contexto pendiente.', ['friends', 'costumes']),
-  memory('little-chapter', '14.01.29_6', 'Mi primer capítulo', 'Yo de pequeña, con vestido rosa y botas. El espejo guardó la otra versión de la foto.', ['everyday']),
-  memory('night-out', '14.00.3_2', 'Una más y nos vamos…', 'Una selfie en plena salida, con compañía, luces y mucha gente alrededor.', ['friends']),
-  memory('red-bridge', '14.01.29_4', 'Un guiño por aquí', 'Mi guiño junto a una barandilla roja, entre bambú y una pequeña cascada.', ['travel', 'everyday']),
-  memory('costume-roar', '14.01.29_5', 'Hoy toca otra versión', 'Yo con maquillaje de disfraz y adornos en el pelo. Discreta no salió la pose.', ['costumes']),
-  memory('rooftop', '15.02.06 (1)', 'Un ratito en las alturas', 'Yo en una terraza, con la ciudad detrás y una sonrisa de esas que salen sin pensarlo.', ['everyday', 'travel']),
-  memory('coffee-stop', '15.02.06', 'Una pausa para el café', 'Mi pausa para el café, con la taza entre las manos y la calle de fondo.', ['everyday']),
-  memory('waterside-selfie', '15.02.07 (1)', 'Mejor en compañía', 'Una selfie en compañía junto al agua. Detrás quedó ese edificio de torre y tejado verde.', ['travel', 'friends']),
-  memory('rainy-wall', '15.02.07 (3)', 'Ni el frío me borra la sonrisa', 'Yo bien abrigada frente a un muro pintado. La lluvia también se vino a la foto.', ['travel']),
-  memory('winter-cup', '15.02.07 (5)', 'Algo calentito entre luces', 'Yo en compañía, con una taza entre las manos y todas las luces del puesto detrás.', ['travel', 'friends']),
-  memory('river-friends', '15.02.07 (8)', 'La ciudad de fondo. Mi gente, primero.', 'Yo compartiendo un abrazo en un puente. El río y la ciudad pusieron las luces.', ['travel', 'friends'], { wide: true }),
-  memory('piggyback-square', '15.02.07 (9)', 'El paseo tomó otro rumbo', 'Yo a caballito en una plaza iluminada. Si tienes el contexto, este es el momento de contarlo.', ['travel', 'friends']),
-  memory('riverside-wave', '15.02.07', 'Y que siga la aventura', 'Yo saludando junto al río, con mis guantes rojos y una torre iluminada a lo lejos.', ['travel']),
-];
+const memories = window.chasMemories;
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const grid = $('#photo-grid');
@@ -37,8 +10,6 @@ let activeFilter = 'all';
 let activeMemoryId = null;
 let detailSequence = memories;
 let lastDialogTrigger = null;
-// Photo-context drafts remain local previews. Published wishes use messages.js.
-const contextDrafts = new Map();
 
 function filteredMemories() {
   return activeFilter === 'all' ? memories : memories.filter((item) => item.tags.includes(activeFilter));
@@ -103,23 +74,6 @@ function closeDialog(dialog) { dialog.close(); }
   });
   dialog.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => closeDialog(dialog)));
 });
-function saveContextDraft() {
-  if (activeMemoryId) contextDrafts.set(activeMemoryId, {
-    text: $('#context-text').value,
-    previewed: !$('#context-preview').hidden,
-  });
-}
-function renderContextPreview(text) {
-  const preview = $('#context-preview');
-  preview.replaceChildren();
-  const label = document.createElement('span');
-  label.className = 'preview-label';
-  label.textContent = 'Tu nota de prueba · solo en esta sesión';
-  const content = document.createElement('p');
-  content.textContent = text;
-  preview.append(label, content);
-  preview.hidden = false;
-}
 function displayMemory(item) {
   activeMemoryId = item.id;
   $('#detail-image').src = item.src;
@@ -127,11 +81,10 @@ function displayMemory(item) {
   $('#detail-title').textContent = item.title;
   $('#detail-caption').textContent = item.description;
   $('#detail-position').textContent = `${detailSequence.indexOf(item) + 1} / ${detailSequence.length}`;
-  const draft = contextDrafts.get(item.id);
-  $('#context-text').value = draft?.text || '';
-  $('#context-preview').hidden = true;
-  if (draft?.previewed) renderContextPreview(draft.text);
+  photoDialog.dataset.photoId = item.id;
+  photoDialog.dispatchEvent(new CustomEvent('memory:change', { detail: { photoId: item.id } }));
   photoDialog.scrollTop = 0;
+  $('#detail-content').scrollTop = 0;
 }
 function openMemory(id, trigger) {
   const item = memories.find((entry) => entry.id === id);
@@ -142,13 +95,11 @@ function openMemory(id, trigger) {
   showDialog(photoDialog, trigger);
 }
 function stepPhoto(direction) {
-  saveContextDraft();
   const index = detailSequence.findIndex((entry) => entry.id === activeMemoryId);
   displayMemory(detailSequence[(index + direction + detailSequence.length) % detailSequence.length]);
 }
 $('#previous-photo').addEventListener('click', () => stepPhoto(-1));
 $('#next-photo').addEventListener('click', () => stepPhoto(1));
-photoDialog.addEventListener('close', saveContextDraft);
 photoDialog.addEventListener('keydown', (event) => {
   if (['INPUT', 'TEXTAREA'].includes(event.target.tagName)) return;
   if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
@@ -178,19 +129,11 @@ $('#random-photo').addEventListener('click', (event) => {
   const items = filteredMemories();
   openMemory(items[Math.floor(Math.random() * items.length)].id, event.currentTarget);
 });
-$('#context-form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const text = $('#context-text').value.trim();
-  if (!text) return;
-  renderContextPreview(text);
-  saveContextDraft();
-});
-
 const contributionTypes = {
   photo: ['La foto que solo tienes tú', 'Aquí podrás elegir hasta 5 fotos por selección, revisarlas y sumarles unas palabras. Las fotos de la fiesta formarán parte de este mismo álbum.', 'Me falta tu parte del recuerdo.'],
   memory: ['¿Te acuerdas de aquella vez…?', 'Aquí podrás contar una historia y elegir si aparece tu nombre. Algunos de mis mejores recuerdos no tienen foto.', 'Las buenas historias merecen su página.'],
   audio: ['Tu voz también es un recuerdo', 'Aquí podrás grabar o adjuntar un audio, escucharlo antes de enviarlo y dejarme un mensaje con tu propia voz.', 'Por ahora, el micrófono sigue descansando.'],
-  gossip: ['A ver, cuéntame el contexto', 'Aquí podrás contarme el chisme con cariño, con nombre o sin nombre público. Si es sobre una foto, podrás añadirlo desde ese recuerdo.', 'Con cariño. Siempre con cariño.'],
+  gossip: ['A ver, cuéntame el contexto', 'Aquí podrás contarme el chisme con cariño, con nombre o sin nombre público. Si es sobre una foto, ya puedes contarlo al abrir ese recuerdo.', 'Con cariño. Siempre con cariño.'],
 };
 function renderContribution(kind) {
   const [title, text, aside] = contributionTypes[kind];
