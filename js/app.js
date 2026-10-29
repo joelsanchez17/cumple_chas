@@ -5,6 +5,7 @@ let guestMemories = [];
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const grid = $('#photo-grid');
+const guestGrid = $('#guest-photo-grid');
 const photoDialog = $('#photo-dialog');
 const contributeDialog = $('#contribute-dialog');
 let activeFilter = 'all';
@@ -14,50 +15,57 @@ let lastDialogTrigger = null;
 let highlightedMemoryIds = new Set();
 
 function filteredMemories() {
-  const all = [...seedMemories, ...guestMemories];
-  return activeFilter === 'all' ? all : seedMemories.filter((item) => item.tags.includes(activeFilter));
+  return activeFilter === 'all' ? seedMemories : seedMemories.filter((item) => item.tags.includes(activeFilter));
+}
+function memoryCard(item, position) {
+  const article = document.createElement('article');
+  article.className = `memory-card${item.wide ? ' wide' : ''}${highlightedMemoryIds.has(item.id) ? ' newly-added' : ''}`;
+  const button = document.createElement('button');
+  button.className = 'memory-button';
+  button.dataset.photo = item.id;
+  button.setAttribute('aria-label', `Abrir recuerdo: ${item.title}`);
+  const frame = document.createElement('div');
+  frame.className = 'memory-image';
+  const img = document.createElement('img');
+  img.src = item.src;
+  img.alt = item.description;
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.width = item.wide ? 2048 : 1536;
+  img.height = item.wide ? 1152 : 2048;
+  if (item.position) img.style.objectPosition = item.position;
+  const number = document.createElement('span');
+  number.className = 'photo-number';
+  number.textContent = String(position).padStart(2, '0');
+  number.setAttribute('aria-hidden', 'true');
+  const arrow = document.createElement('span');
+  arrow.className = 'photo-open';
+  arrow.textContent = '↗';
+  arrow.setAttribute('aria-hidden', 'true');
+  frame.append(img, number, arrow);
+  const title = document.createElement('span');
+  title.className = 'memory-title';
+  title.textContent = item.title;
+  const hint = document.createElement('span');
+  hint.className = 'memory-hint';
+  hint.textContent = item.origin === 'guest' ? `Por ${item.uploaderLabel}` : 'Esta foto necesita contexto…';
+  button.append(frame, title, hint);
+  article.append(button);
+  return article;
 }
 function renderAlbum() {
   const items = filteredMemories();
-  grid.replaceChildren();
-  items.forEach((item) => {
-    const article = document.createElement('article');
-    article.className = `memory-card${item.wide ? ' wide' : ''}${highlightedMemoryIds.has(item.id) ? ' newly-added' : ''}`;
-    const button = document.createElement('button');
-    button.className = 'memory-button';
-    button.dataset.photo = item.id;
-    button.setAttribute('aria-label', `Abrir recuerdo: ${item.title}`);
-    const frame = document.createElement('div');
-    frame.className = 'memory-image';
-    const img = document.createElement('img');
-    img.src = item.src;
-    img.alt = item.description;
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    img.width = item.wide ? 2048 : 1536;
-    img.height = item.wide ? 1152 : 2048;
-    if (item.position) img.style.objectPosition = item.position;
-    const number = document.createElement('span');
-    number.className = 'photo-number';
-    const position = [...seedMemories, ...guestMemories].findIndex((memory) => memory.id === item.id) + 1;
-    number.textContent = String(position).padStart(2, '0');
-    number.setAttribute('aria-hidden', 'true');
-    const arrow = document.createElement('span');
-    arrow.className = 'photo-open';
-    arrow.textContent = '↗';
-    arrow.setAttribute('aria-hidden', 'true');
-    frame.append(img, number, arrow);
-    const title = document.createElement('span');
-    title.className = 'memory-title';
-    title.textContent = item.title;
-    const hint = document.createElement('span');
-    hint.className = 'memory-hint';
-    hint.textContent = item.origin === 'guest' ? `Por ${item.uploaderLabel}` : 'Esta foto necesita contexto…';
-    button.append(frame, title, hint);
-    article.append(button);
-    grid.append(article);
-  });
-  $('#album-count').textContent = `${items.length} ${items.length === 1 ? 'recuerdo' : 'recuerdos'}${activeFilter === 'all' ? ' en este álbum que sigue creciendo.' : ` de ${seedMemories.length} recuerdos originales.`}`;
+  grid.replaceChildren(...items.map((item) => memoryCard(item, seedMemories.indexOf(item) + 1)));
+  $('#album-count').textContent = activeFilter === 'all'
+    ? `${seedMemories.length} recuerdos elegidos para este álbum.`
+    : `${items.length} ${items.length === 1 ? 'recuerdo' : 'recuerdos'} de ${seedMemories.length} en el álbum.`;
+}
+function renderGuestPhotos() {
+  guestGrid.replaceChildren(...guestMemories.map((item, index) => memoryCard(item, index + 1)));
+  const count = $('#guest-photo-count');
+  count.textContent = guestMemories.length
+    ? `${guestMemories.length} ${guestMemories.length === 1 ? 'foto compartida' : 'fotos compartidas'} por mi gente.`
+    : '';
 }
 function showDialog(dialog, trigger) {
   lastDialogTrigger = trigger || document.activeElement;
@@ -95,8 +103,11 @@ function openMemory(id, trigger) {
   const all = [...seedMemories, ...guestMemories];
   const item = all.find((entry) => entry.id === id);
   if (!item) return;
-  const filtered = filteredMemories();
-  detailSequence = filtered.some((entry) => entry.id === id) ? filtered : all;
+  if (item.origin === 'guest') detailSequence = guestMemories;
+  else {
+    const filtered = filteredMemories();
+    detailSequence = filtered.some((entry) => entry.id === id) ? filtered : seedMemories;
+  }
   displayMemory(item);
   showDialog(photoDialog, trigger);
 }
@@ -177,6 +188,7 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 window.addEventListener('resize', updateActiveNavigation);
 renderAlbum();
+renderGuestPhotos();
 updateActiveNavigation();
 
 window.chasAlbum = Object.freeze({
@@ -184,30 +196,27 @@ window.chasAlbum = Object.freeze({
     const loadedIds = new Set(items.map((item) => item.id));
     guestMemories = [...items, ...guestMemories.filter((item) => !loadedIds.has(item.id))]
       .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-    renderAlbum();
+    renderGuestPhotos();
   },
   addGuestPhotos(items) {
     const ids = new Set(items.map((item) => item.id));
     guestMemories = [...items, ...guestMemories.filter((item) => !ids.has(item.id))]
       .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-    renderAlbum();
+    renderGuestPhotos();
   },
   hasPhoto(id) {
     return seedMemories.some((item) => item.id === id) || guestMemories.some((item) => item.id === id);
   },
-  revealPhotos(ids) {
+  guestPhotoCount() {
+    return guestMemories.length;
+  },
+  revealGuestPhotos(ids) {
     highlightedMemoryIds = new Set(ids);
-    activeFilter = 'all';
-    $$('[data-filter]').forEach((filter) => {
-      const selected = filter.dataset.filter === 'all';
-      filter.classList.toggle('active', selected);
-      filter.setAttribute('aria-pressed', String(selected));
-    });
-    renderAlbum();
+    renderGuestPhotos();
     requestAnimationFrame(() => {
       const first = ids.length ? document.querySelector(`[data-photo="${ids[0]}"]`) : null;
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      (first?.closest('.memory-card') || $('#album')).scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+      (first?.closest('.memory-card') || $('#guest-photos')).scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
       setTimeout(() => {
         highlightedMemoryIds.clear();
         $$('.memory-card.newly-added').forEach((card) => card.classList.remove('newly-added'));

@@ -33,14 +33,14 @@
   function progressMessage(stage, position, total) {
     if (stage === 'compressing') return 'Preparando fotos…';
     if (stage === 'uploading') return `Subiendo ${position} de ${total}…`;
-    if (stage === 'registering') return total === 1 ? 'Guardando en el álbum…' : `Guardando ${position} de ${total} en el álbum…`;
+    if (stage === 'registering') return total === 1 ? 'Guardando entre las fotos compartidas…' : `Guardando ${position} de ${total} entre las fotos compartidas…`;
     return '';
   }
 
   function resultCopy(successCount, failureCount) {
     if (!failureCount) return {
       title: '¡Listo!',
-      detail: successCount === 1 ? 'Esta foto ya está en el álbum.' : `Tus ${successCount} fotos ya están en el álbum.`,
+      detail: successCount === 1 ? 'Tu foto ya está entre los recuerdos compartidos.' : `Tus ${successCount} fotos ya están entre los recuerdos compartidos.`,
     };
     return {
       title: `${successCount} ${successCount === 1 ? 'foto subida' : 'fotos subidas'}`,

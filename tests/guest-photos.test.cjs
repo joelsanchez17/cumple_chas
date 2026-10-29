@@ -72,20 +72,21 @@ test('progress and completion copy clearly identifies stages, counts and partial
   const tool = helpers();
   assert.equal(tool.progressMessage('compressing', 1, 3), 'Preparando fotos…');
   assert.equal(tool.progressMessage('uploading', 1, 3), 'Subiendo 1 de 3…');
-  assert.equal(tool.progressMessage('registering', 1, 1), 'Guardando en el álbum…');
-  assert.equal(tool.progressMessage('registering', 2, 3), 'Guardando 2 de 3 en el álbum…');
-  assert.deepEqual(plain(tool.resultCopy(1, 0)), { title: '¡Listo!', detail: 'Esta foto ya está en el álbum.' });
-  assert.deepEqual(plain(tool.resultCopy(3, 0)), { title: '¡Listo!', detail: 'Tus 3 fotos ya están en el álbum.' });
+  assert.equal(tool.progressMessage('registering', 1, 1), 'Guardando entre las fotos compartidas…');
+  assert.equal(tool.progressMessage('registering', 2, 3), 'Guardando 2 de 3 entre las fotos compartidas…');
+  assert.deepEqual(plain(tool.resultCopy(1, 0)), { title: '¡Listo!', detail: 'Tu foto ya está entre los recuerdos compartidos.' });
+  assert.deepEqual(plain(tool.resultCopy(3, 0)), { title: '¡Listo!', detail: 'Tus 3 fotos ya están entre los recuerdos compartidos.' });
   assert.deepEqual(plain(tool.resultCopy(4, 1)), { title: '4 fotos subidas', detail: '1 foto no pudo subirse.' });
 });
 
-test('upload markup includes obvious completion actions and the subtle Chas success easter egg', () => {
+test('upload markup points to the dedicated shared-photo section and leaves the extra local image unused', () => {
   const html = source('index.html');
-  assert.match(html, /id="photo-upload-view"[^>]*>Ver en el álbum/);
-  assert.match(html, /id="photo-upload-another"[^>]*>Subir más fotos/);
+  assert.match(html, /id="guest-photos"/);
+  assert.match(html, /id="guest-photo-grid"/);
+  assert.match(html, /id="photo-upload-view"[^>]*>Ver las fotos compartidas/);
+  assert.match(html, /id="photo-upload-another"[^>]*>Subir otra/);
   assert.match(html, /id="photo-upload-success"/);
-  assert.match(html, /17\.25\.10\.jpeg/);
-  assert.match(html, /yo, celebrando por dentro/);
+  assert.doesNotMatch(html, /17\.25\.10\.jpeg/);
 });
 
 test('partial failures remain retryable and successful photos are never uploaded twice', async () => {

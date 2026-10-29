@@ -20,21 +20,21 @@ Before upload, each image is decoded in the browser with its embedded orientatio
 
 Every object path is generated as `uploads/<crypto.randomUUID()>.webp` (or `.jpg` for the fallback). Uploads always use `upsert: false`. Storage succeeds before the row is inserted into `public.photos`; the row contains `storage_path`, the optional `caption`, `uploader_name` or `null`, and `is_anonymous`. The insert returns the database UUID. If that insert fails, the client does not attempt a forbidden delete: it logs the storage path for administrative cleanup, warns the guest not to resend that item, and leaves the possible orphan documented here.
 
-Rows are loaded newest first and their public Storage URLs are rendered after the 19 unchanged original memories. A guest row with UUID `<uuid>` gets application/comment ID `guest-<uuid>`. That stable value is passed unchanged to the existing `photo_comments.photo_id` reads and writes, so guest photos use the same modal, named/anonymous comments, drafts, pagination and failure handling as original photos.
+Rows are loaded newest first into the dedicated **Lo que ustedes sumaron** section. They never enter or affect the curated 19-photo **El álbum** grid, its filters, random button or numbering. A guest row with UUID `<uuid>` gets application/comment ID `guest-<uuid>`. That stable value is passed unchanged to the existing `photo_comments.photo_id` reads and writes, so guest photos use the same modal, named/anonymous comments, drafts, pagination and failure handling as original photos. Previous/next navigation stays within whichever collection was opened.
 
 Batch progress is item-based (preparing, uploading, registering, finished), because the Supabase browser upload API does not expose byte progress. When only part of a batch succeeds, successful items are locked and skipped on retry; connection/upload failures remain with their preview and caption. A post-upload metadata failure is not automatically retried because doing so would create another Storage object.
 
 Manual upload test:
 
 1. Start the local server, open the site on a phone-sized viewport, tap **Sumar**, and choose one supported photo. Confirm its preview, add context, enter a name, and submit. Watch the explicit preparation, numbered upload and album-registration stages.
-2. Confirm the large **¡Listo!** state appears. Test **Subir más fotos**, then upload again and use **Ver en el álbum**; the sheet should close, the album should scroll into view and the new memory should be briefly highlighted. Open it and verify its caption, uploader, previous/next navigation, and named then anonymous comments. Reload and confirm both photo and comments persist.
+2. Confirm the large **¡Listo!** state appears. Test **Subir otra**, then upload again and use **Ver las fotos compartidas**; the sheet should close, the dedicated guest section should scroll into view and the new memory should be briefly highlighted. The curated grid must still contain exactly its 19 original memories. Open the guest photo and verify its caption, uploader, guest-only previous/next navigation, and named then anonymous comments. Reload and confirm both photo and comments persist.
 3. Repeat with **Sin nombre** and verify the album shows **Anónimo**, not the previously typed name.
 4. Select five photos and remove one before submitting. Then try selecting six at once, or four followed by two more; the selection must be rejected with the five-photo explanation.
 5. Try a non-image or unsupported HEIC/GIF file. It must not upload and the UI must explain the accepted formats.
 6. In developer tools, inspect a compressed upload: its longest dimension is at most 1920 px, normally uses WebP, is much smaller than the original, and the Storage request does not overwrite. Inspect the following `photos` insert payload and returned UUID.
 7. Simulate partial failure by taking the browser offline during a multi-photo batch. Restore connectivity and retry: completed items must not upload again, while retryable items remain available.
 8. Block only the `photos` insert after allowing Storage. Confirm the friendly warning, the technical console entry with `storagePath`, and that the browser makes no DELETE request. Clean that orphan later with administrative credentials if needed.
-9. Block the guest-photo SELECT and reload. The 19 originals must remain usable with an honest guest-photo error state.
+9. Block the guest-photo SELECT and reload. The 19 originals must remain usable and unchanged while the separate guest section shows an honest error state.
 
 ## Para Chas messages
 

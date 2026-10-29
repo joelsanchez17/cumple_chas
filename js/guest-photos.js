@@ -4,7 +4,7 @@
   const api = window.chasGuestPhotosApi;
   const tools = window.chasPhotoUpload;
   const status = document.querySelector('#guest-photos-status');
-  const grid = document.querySelector('#photo-grid');
+  const grid = document.querySelector('#guest-photo-grid');
   const form = document.querySelector('#photo-upload-form');
   const input = document.querySelector('#photo-files');
   const previews = document.querySelector('#photo-previews');
@@ -50,7 +50,7 @@
     return {
       id: tools.guestPhotoId(row.id),
       src: api.publicUrl(row.storage_path),
-      title: caption || 'Esta también va al álbum',
+      title: caption || 'Un recuerdo compartido',
       description: caption || `Un recuerdo que sumó ${label}.`,
       tags: [], origin: 'guest', uploaderLabel: label, createdAt: row.created_at,
     };
@@ -65,7 +65,8 @@
     try {
       const rows = await api.read();
       window.chasAlbum.setGuestPhotos((rows || []).map(asMemory));
-      setStatus(status, rows?.length ? '' : 'Todavía nadie sumó una foto. ¿Estrenas tú esta página?');
+      const hasGuestPhotos = window.chasAlbum.guestPhotoCount() > 0;
+      setStatus(status, hasGuestPhotos ? '' : 'Este rincón todavía está esperando sus primeras fotos. ¿Estrenas tú esta página?', hasGuestPhotos ? '' : 'empty');
     } catch (error) {
       console.error('Could not load guest photos:', error);
       setStatus(status, 'No pudimos cargar las fotos nuevas. Las 19 originales siguen disponibles; prueba recargando la página.', 'error');
@@ -123,7 +124,7 @@
     const retryable = items.some((item) => item.status !== 'success' && item.retryable !== false);
     submit.disabled = uploading || !retryable;
     const retryCount = items.filter((item) => item.status === 'error' && item.retryable !== false).length;
-    submitLabel.textContent = retryCount ? `Reintentar ${retryCount === 1 ? 'foto' : 'fotos'}` : 'Subir al álbum';
+    submitLabel.textContent = retryCount ? `Reintentar ${retryCount === 1 ? 'foto' : 'fotos'}` : 'Compartir fotos';
     reset.hidden = !items.length || uploading || retryable;
   }
 
@@ -260,6 +261,7 @@
     if (newSuccesses.length) {
       const memories = newSuccesses.map((entry) => asMemory(entry.value));
       window.chasAlbum.addGuestPhotos(memories);
+      setStatus(status, '');
       uploadedMemoryIds.push(...memories.map((memory) => memory.id));
     }
     const successCount = items.filter((item) => item.status === 'success').length;
@@ -289,7 +291,7 @@
   uploadAnother.addEventListener('click', clearBatch);
   viewAlbum.addEventListener('click', () => {
     if (dialog.open) dialog.close();
-    window.chasAlbum.revealPhotos(uploadedMemoryIds);
+    window.chasAlbum.revealGuestPhotos(uploadedMemoryIds);
   });
   uploaderName.addEventListener('input', () => { uploaderName.removeAttribute('aria-invalid'); setStatus(uploadStatus, ''); });
   renderPreviews();

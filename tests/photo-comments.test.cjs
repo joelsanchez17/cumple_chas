@@ -115,11 +115,32 @@ test('a loaded guest photo opens in the same modal and reads comments with its s
   const id = 'guest-e42fe96f-fcc0-46c6-85ff-7180a094ec9a';
   window.chasAlbum.setGuestPhotos([{ id, src: 'https://example.test/photo.webp', title: 'Esta también va al álbum',
     description: 'Una noche bonita', tags: [], origin: 'guest', uploaderLabel: 'Anónimo' }]);
-  assert.equal(el['photo-grid'].children.length, 20);
+  assert.equal(el['photo-grid'].children.length, 19);
+  assert.equal(el['guest-photo-grid'].children.length, 1);
+  assert.equal(el['guest-photo-grid'].children[0].children[0].dataset.photo, id);
   vm.runInContext(`openMemory('${id}')`, context); await tick();
   assert.equal(el['photo-dialog'].dataset.photoId, id);
   assert.equal(el['detail-uploader'].textContent, 'Sumada por Anónimo');
   assert.deepEqual(calls, [id]);
+});
+
+test('guest photos never enter the curated grid or its filters', async () => {
+  const { el, context, window } = setup(api(), { app: true });
+  const guests = [
+    { id: 'guest-new', src: 'new.webp', title: 'Nueva', description: 'Nueva', tags: [], origin: 'guest', uploaderLabel: 'Ana', createdAt: '2026-10-30T12:00:00Z' },
+    { id: 'guest-old', src: 'old.webp', title: 'Anterior', description: 'Anterior', tags: [], origin: 'guest', uploaderLabel: 'Anónimo', createdAt: '2026-10-29T12:00:00Z' },
+  ];
+  window.chasAlbum.setGuestPhotos(guests);
+  assert.equal(el['photo-grid'].children.length, 19);
+  assert.deepEqual(el['photo-grid'].children.map((card) => card.children[0].dataset.photo), [...window.chasMemories].map((photo) => photo.id));
+  assert.deepEqual(el['guest-photo-grid'].children.map((card) => card.children[0].dataset.photo), ['guest-new', 'guest-old']);
+  const travel = context.document.querySelectorAll('[data-filter]').find((button) => button.dataset.filter === 'travel');
+  await travel.fire('click');
+  assert.equal(el['photo-grid'].children.length, window.chasMemories.filter((photo) => photo.tags.includes('travel')).length);
+  assert.equal(el['guest-photo-grid'].children.length, 2);
+  vm.runInContext("openMemory('guest-new')", context); await tick();
+  await el['next-photo'].fire('click'); await tick();
+  assert.equal(el['photo-dialog'].dataset.photoId, 'guest-old');
 });
 
 test('loads only the selected photo, renders literal text and hides anonymous identity', async () => {
