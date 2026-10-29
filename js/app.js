@@ -37,7 +37,7 @@ let activeFilter = 'all';
 let activeMemoryId = null;
 let detailSequence = memories;
 let lastDialogTrigger = null;
-// Drafts are intentionally in memory only. Nothing is submitted or stored.
+// Photo-context drafts remain local previews. Published wishes use messages.js.
 const contextDrafts = new Map();
 
 function filteredMemories() {
@@ -211,27 +211,6 @@ function renderContribution(kind) {
   });
 }
 $$('[data-kind]').forEach((button) => button.addEventListener('click', () => renderContribution(button.dataset.kind)));
-$('#wish-anonymous').addEventListener('change', (event) => {
-  $('#wish-name').disabled = event.target.checked;
-});
-$('#wish-form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const text = $('#wish-message').value.trim();
-  if (!text) return;
-  const name = $('#wish-anonymous').checked ? 'Alguien que te quiere' : ($('#wish-name').value.trim() || 'Alguien que te quiere');
-  const preview = $('#wish-preview');
-  preview.replaceChildren();
-  const label = document.createElement('span');
-  label.className = 'preview-label';
-  label.textContent = 'Tu notita de prueba · no enviada';
-  const content = document.createElement('p');
-  content.textContent = text;
-  const signature = document.createElement('span');
-  signature.className = 'preview-signature';
-  signature.textContent = `Con cariño, ${name}`;
-  preview.append(label, content, signature);
-  preview.hidden = false;
-});
 let confettiTimeout;
 $('#celebrate').addEventListener('click', () => {
   $('#celebration-status').textContent = '¡Feliz cumple, Chas!';

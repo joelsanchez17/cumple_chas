@@ -8,6 +8,9 @@
   <title>Chas · Mi álbum de recuerdos</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="js/app.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" defer></script>
+  <script src="js/supabase-client.js" defer></script>
+  <script src="js/messages.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#inicio">Saltar al contenido</a>
@@ -61,7 +64,28 @@
 
     <section class="contribute-section" id="sumar" aria-labelledby="contribute-title"><div class="section-shell contribute-inner"><div class="contribute-art" aria-hidden="true"><span>+</span><i>tu parte<br>de la historia</i></div><div><p class="eyebrow">SEGURO TÚ TIENES OTRA VERSIÓN</p><h2 id="contribute-title">Mi historia no cabe<br>en <em>mis propias fotos.</em></h2><p>Quiero ver la foto que tienes tú, leer esa anécdota<br>y escuchar tu voz cuando me dé nostalgia.</p><button class="button button-primary" data-contribute>Sumar algo bonito <span aria-hidden="true">+</span></button><p class="preview-note">Vista previa · Los envíos todavía no están disponibles.</p></div></div></section>
 
-    <section class="messages-section section-shell" id="para-chas" aria-labelledby="messages-title"><div class="section-heading"><div><p class="eyebrow">03 / DIRECTO AL CORAZÓN</p><h2 id="messages-title">¿Me dejas<br><em>unas palabras?</em></h2></div><span class="handwritten message-note">Las palabras también<br>son un recuerdo. ♡</span></div><div class="letter-layout"><div class="letter-intro"><span class="large-heart" aria-hidden="true">♡</span><h3>Me encantará<br>leerte por aquí.</h3><p>Un deseo, un “¿te acuerdas?” o lo que te nazca. Quiero tener un rincón para volver a leer a mi gente.</p><p class="preview-note">Aún no hay mensajes publicados. Puedes probar cómo se vería el tuyo: esta vista previa se borra al recargar.</p></div><form id="wish-form" class="wish-form"><div class="letter-top"><span>UNA NOTITA PARA CHAS</span><span aria-hidden="true">↗ ♡</span></div><label for="wish-message">Chas, quería decirte…</label><textarea id="wish-message" maxlength="1000" rows="4" placeholder="Que nunca te falten motivos para bailar…" required></textarea><div class="signature-row"><label for="wish-name">Con cariño,<input id="wish-name" maxlength="50" placeholder="Tu nombre" autocomplete="given-name"></label><label class="checkbox-label"><input type="checkbox" id="wish-anonymous"> Sin nombre</label></div><button class="button button-dark" type="submit">Previsualizar mi notita <span aria-hidden="true">↗</span></button><p class="form-note">Solo una prueba en esta página. No se envía ni se guarda.</p><div id="wish-preview" class="wish-preview" hidden aria-live="polite"></div></form></div></section>
+    <section class="messages-section section-shell" id="para-chas" aria-labelledby="messages-title">
+      <div class="section-heading"><div><p class="eyebrow">03 / DIRECTO AL CORAZÓN</p><h2 id="messages-title">¿Me dejas<br><em>unas palabras?</em></h2></div><span class="handwritten message-note">Las palabras también<br>son un recuerdo. ♡</span></div>
+      <div class="letter-layout">
+        <div class="letter-intro"><span class="large-heart" aria-hidden="true">♡</span><h3>Me encantará<br>leerte por aquí.</h3><p>Un deseo, un “¿te acuerdas?” o lo que te nazca. Quiero tener un rincón para volver a leer a mi gente.</p><p class="form-note">Tu notita quedará en este álbum y podrán leerla quienes lo visiten. Puedes firmarla o elegir “Sin nombre”.</p></div>
+        <form id="wish-form" class="wish-form" novalidate>
+          <div class="letter-top"><span>UNA NOTITA PARA CHAS</span><span aria-hidden="true">↗ ♡</span></div>
+          <label for="wish-message">Chas, quería decirte…</label>
+          <textarea id="wish-message" name="content" maxlength="1000" rows="4" placeholder="Que nunca te falten motivos para bailar…" aria-describedby="wish-help wish-status" required></textarea>
+          <div class="signature-row"><label for="wish-name">Con cariño,<input id="wish-name" name="name" maxlength="50" placeholder="Tu nombre" autocomplete="given-name" aria-describedby="wish-help wish-status" required></label><label class="checkbox-label"><input type="checkbox" id="wish-anonymous" name="is_anonymous"> Sin nombre</label></div>
+          <p id="wish-help" class="form-note">Escribe tu nombre o marca “Sin nombre”. Mensaje: hasta 1000 caracteres; nombre: hasta 50.</p>
+          <button id="wish-submit" class="button button-dark" type="submit" disabled>Enviar mi notita <span aria-hidden="true">↗</span></button>
+          <p id="wish-status" class="message-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        </form>
+      </div>
+      <div class="published-messages" aria-labelledby="published-title">
+        <div class="messages-heading"><h3 id="published-title">Las notitas de mi gente</h3><button id="messages-refresh" class="text-button" type="button">Actualizar <span aria-hidden="true">↻</span></button></div>
+        <p id="messages-status" class="message-status" role="status" aria-live="polite" aria-atomic="true">Cargando las notitas…</p>
+        <div id="messages-list" class="messages-grid" aria-busy="true"></div>
+        <button id="messages-more" class="text-button" type="button" hidden>Ver más notitas <span aria-hidden="true">↓</span></button>
+        <noscript><p>Activa JavaScript para leer y enviar las notitas.</p></noscript>
+      </div>
+    </section>
   </main>
   <footer class="site-footer section-shell"><a class="brand" href="#inicio">el álbum de <strong>Chas</strong><span class="brand-dot">.</span></a><p>Mis recuerdos favoritos siempre tienen buena compañía.</p><span class="footer-stitch" aria-hidden="true">╱╲╱╲╱╲</span><small class="site-credit">Hecho con ayuda de: Juanse, Miguel, Seba y Joel</small></footer>
   <div class="confetti-layer" id="confetti" aria-hidden="true"></div>
