@@ -32,6 +32,7 @@ class Element {
   showModal() { this.open = true; }
   close() { this.open = false; this.dispatchEvent({ type: 'close' }); }
   getBoundingClientRect() { return { top: 1000, left: 0, right: 100, bottom: 100 }; }
+  scrollIntoView(options) { this.scrolled = options; }
 }
 function api(overrides = {}) {
   return { pageSize: 50, read: async () => [], create: async () => null, ...overrides };
@@ -106,6 +107,19 @@ test('existing modal, hero links, filters and previous/next use the permanent ID
   assert.deepEqual(calls, [A, B, A, 'chas-memory-019']);
   el['photo-dialog'].close();
   assert.equal(el['comment-submit'].disabled, true);
+});
+
+test('a loaded guest photo opens in the same modal and reads comments with its stable guest UUID', async () => {
+  const calls = [];
+  const { el, context, window } = setup(api({ read: async (id) => { calls.push(id); return []; } }), { app: true });
+  const id = 'guest-e42fe96f-fcc0-46c6-85ff-7180a094ec9a';
+  window.chasAlbum.setGuestPhotos([{ id, src: 'https://example.test/photo.webp', title: 'Esta también va al álbum',
+    description: 'Una noche bonita', tags: [], origin: 'guest', uploaderLabel: 'Anónimo' }]);
+  assert.equal(el['photo-grid'].children.length, 20);
+  vm.runInContext(`openMemory('${id}')`, context); await tick();
+  assert.equal(el['photo-dialog'].dataset.photoId, id);
+  assert.equal(el['detail-uploader'].textContent, 'Sumada por Anónimo');
+  assert.deepEqual(calls, [id]);
 });
 
 test('loads only the selected photo, renders literal text and hides anonymous identity', async () => {

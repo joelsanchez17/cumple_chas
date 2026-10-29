@@ -14,7 +14,6 @@
   const refreshButton = document.querySelector('#comments-refresh');
   const moreButton = document.querySelector('#comments-more');
   const contextTag = document.querySelector('#photo-context-tag');
-  const validPhotoIds = new Set(window.chasMemories.map((item) => item.id));
   const drafts = new Map();
   const dateFormatter = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short', year: 'numeric' });
   let activePhotoId = null;
@@ -146,7 +145,7 @@
   function selectPhoto(photoId) {
     saveDraft();
     ++readGeneration;
-    activePhotoId = validPhotoIds.has(photoId) ? photoId : null;
+    activePhotoId = window.chasAlbum?.hasPhoto(photoId) || window.chasMemories.some((item) => item.id === photoId) ? photoId : null;
     list.replaceChildren();
     loadedCount = 0;
     moreButton.hidden = true;

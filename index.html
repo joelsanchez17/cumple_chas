@@ -8,9 +8,11 @@
   <title>Chas · Mi álbum de recuerdos</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="js/photos.js" defer></script>
+  <script src="js/photo-upload.js" defer></script>
   <script src="js/app.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" defer></script>
   <script src="js/supabase-client.js" defer></script>
+  <script src="js/guest-photos.js" defer></script>
   <script src="js/messages.js" defer></script>
   <script src="js/photo-comments.js" defer></script>
 </head>
@@ -59,12 +61,13 @@
       <div class="section-heading"><div><p class="eyebrow">02 / MI ÁLBUM SIGUE ABIERTO</p><h2 id="album-title">Esto lo quiero <em>guardar.</em></h2></div><p>Mis viajes, mi gente.<br>Y fotos que no pienso explicar sola.</p></div>
       <div class="album-toolbar"><div class="filters" role="group" aria-label="Filtrar recuerdos"><button class="filter active" data-filter="all" aria-pressed="true">Todo</button><button class="filter" data-filter="travel" aria-pressed="false">Por el mundo</button><button class="filter" data-filter="friends" aria-pressed="false">Mi gente</button><button class="filter" data-filter="costumes" aria-pressed="false">Otras versiones</button><button class="filter" data-filter="everyday" aria-pressed="false">Pequeños momentos</button></div><button class="random-button" id="random-photo" aria-label="Abrir un recuerdo al azar">↝ <span>Sorpréndeme</span></button></div>
       <p class="album-count" id="album-count" role="status" aria-live="polite"></p>
-      <div class="photo-grid" id="photo-grid"></div>
+      <p id="guest-photos-status" class="message-status album-status" role="status" aria-live="polite">Buscando los recuerdos que sumó mi gente…</p>
+      <div class="photo-grid" id="photo-grid" aria-busy="true"></div>
       <noscript><p>Activa JavaScript para explorar las 19 fotos y abrir sus detalles.</p></noscript>
-      <div class="album-end"><span class="handwritten">Me quedan muchas páginas por llenar.</span><button class="text-button" data-contribute>¿Tienes un recuerdo conmigo? <span aria-hidden="true">↗</span></button></div>
+      <div class="album-end"><span class="handwritten">Me quedan muchas páginas por llenar.</span><button class="text-button" data-contribute>¿Tienes una foto conmigo? <span aria-hidden="true">↗</span></button></div>
     </section>
 
-    <section class="contribute-section" id="sumar" aria-labelledby="contribute-title"><div class="section-shell contribute-inner"><div class="contribute-art" aria-hidden="true"><span>+</span><i>tu parte<br>de la historia</i></div><div><p class="eyebrow">SEGURO TÚ TIENES OTRA VERSIÓN</p><h2 id="contribute-title">Mi historia no cabe<br>en <em>mis propias fotos.</em></h2><p>Quiero ver la foto que tienes tú, leer esa anécdota<br>y escuchar tu voz cuando me dé nostalgia.</p><button class="button button-primary" data-contribute>Sumar algo bonito <span aria-hidden="true">+</span></button><p class="preview-note">Vista previa · Los envíos todavía no están disponibles.</p></div></div></section>
+    <section class="contribute-section" id="sumar" aria-labelledby="contribute-title"><div class="section-shell contribute-inner"><div class="contribute-art" aria-hidden="true"><span>+</span><i>tu parte<br>de la historia</i></div><div><p class="eyebrow">SEGURO TÚ TIENES OTRA VERSIÓN</p><h2 id="contribute-title">Mi historia no cabe<br>en <em>mis propias fotos.</em></h2><p>Quiero ver esa foto que solo tienes tú y guardar también tu parte de la historia.</p><button class="button button-primary" data-contribute>Sumar un recuerdo <span aria-hidden="true">+</span></button><p class="preview-note">Este álbum es compartido: las fotos y sus datos serán públicos para quienes lo visiten.</p></div></div></section>
 
     <section class="messages-section section-shell" id="para-chas" aria-labelledby="messages-title">
       <div class="section-heading"><div><p class="eyebrow">03 / DIRECTO AL CORAZÓN</p><h2 id="messages-title">¿Me dejas<br><em>unas palabras?</em></h2></div><span class="handwritten message-note">Las palabras también<br>son un recuerdo. ♡</span></div>
@@ -98,7 +101,7 @@
       <div class="detail-image-wrap"><img id="detail-image" alt=""><div class="detail-image-controls"><button class="round-button" id="previous-photo" aria-label="Foto anterior">←</button><span id="detail-position" aria-live="polite" aria-atomic="true"></span><button class="round-button" id="next-photo" aria-label="Foto siguiente">→</button></div></div>
       <div class="detail-copy" id="detail-content">
         <button class="round-button close-dialog" data-close aria-label="Cerrar detalle">×</button>
-        <p class="eyebrow">UNA PÁGINA DE MI ÁLBUM</p><h2 id="detail-title"></h2><p id="detail-caption"></p>
+        <p class="eyebrow">UNA PÁGINA DE MI ÁLBUM</p><h2 id="detail-title"></h2><p id="detail-caption"></p><p id="detail-uploader" class="detail-uploader"></p>
         <span class="context-tag" id="photo-context-tag">Esta foto necesita contexto…</span>
         <div class="detail-comments">
           <div class="comments-heading"><h3 id="comments-title">¿Me ayudas con el contexto?</h3><button id="comments-refresh" class="text-button" type="button">Actualizar ↻</button></div>
@@ -118,6 +121,36 @@
     </div>
   </dialog>
 
-  <dialog id="contribute-dialog" class="contribute-dialog" aria-labelledby="add-title"><button class="round-button close-dialog" data-close aria-label="Cerrar opciones para sumar">×</button><p class="eyebrow">HAY MÁS DE UNA FORMA DE ESTAR</p><h2 id="add-title">¿Sumas tu <em>pedacito?</em></h2><p class="add-description">Quiero guardar también tu parte de la historia.</p><p class="preview-banner"><strong>Estoy preparando este rincón.</strong> Puedes explorar las opciones. Todavía no se graba, se sube ni se guarda nada.</p><div class="contribution-options" role="group" aria-label="Tipos de aportación"><button data-kind="photo" aria-pressed="true" class="selected"><span aria-hidden="true">▧</span>Una foto</button><button data-kind="memory" aria-pressed="false"><span aria-hidden="true">✎</span>Un recuerdo</button><button data-kind="audio" aria-pressed="false"><span aria-hidden="true">♬</span>Un audio</button><button data-kind="gossip" aria-pressed="false"><span aria-hidden="true">☏</span>Un chisme</button></div><div class="contribution-preview" id="contribution-preview" role="status" aria-live="polite"></div><button class="button button-dark" data-close>Me quedo explorando el álbum <span aria-hidden="true">↗</span></button></dialog>
+  <dialog id="contribute-dialog" class="contribute-dialog upload-dialog" aria-labelledby="add-title">
+    <button class="round-button close-dialog" data-close aria-label="Cerrar subida de fotos">×</button>
+    <p class="eyebrow">TU PARTE TAMBIÉN VA AL ÁLBUM</p><h2 id="add-title">Sumar un <em>recuerdo.</em></h2>
+    <p class="add-description">Elige hasta 5 fotos. Las haremos más ligeras antes de subirlas, sin sacarlas de tu navegador.</p>
+    <form id="photo-upload-form" class="photo-upload-form" novalidate>
+      <div id="photo-upload-workspace">
+        <label class="photo-picker" for="photo-files"><span aria-hidden="true">＋</span><strong>Elegir fotos</strong><small>JPG, PNG o WebP · máximo 5 por lote</small></label>
+        <input class="sr-only" id="photo-files" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+        <p id="photo-selection-status" class="message-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        <div id="photo-previews" class="photo-previews"></div>
+        <fieldset id="photo-uploader-fields" class="uploader-fields">
+          <legend>¿Quién suma estas fotos?</legend>
+          <div class="signature-row"><label for="photo-uploader-name">Tu nombre<input id="photo-uploader-name" maxlength="50" autocomplete="name" placeholder="Tu nombre" required></label><label class="checkbox-label"><input id="photo-uploader-anonymous" type="checkbox"> Sin nombre</label></div>
+        </fieldset>
+        <p class="form-note">Las fotos y estos datos formarán parte del álbum público. No subas algo que prefieras mantener privado.</p>
+        <div class="upload-progress" id="photo-upload-progress" role="progressbar" aria-label="Progreso de subida" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span></span></div>
+        <p id="photo-upload-stage" class="upload-stage" role="status" aria-live="polite" aria-atomic="true"></p>
+        <section id="photo-upload-result" class="upload-result" role="status" aria-live="polite" hidden><h3 id="photo-upload-result-title"></h3><p id="photo-upload-result-detail"></p></section>
+        <button id="photo-upload-submit" class="button button-dark" type="submit" disabled><span id="photo-upload-submit-label">Subir al álbum</span> <span aria-hidden="true">↗</span></button>
+        <button id="photo-upload-reset" class="text-button" type="button" hidden>Elegir otro lote</button>
+        <p id="photo-upload-status" class="message-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      </div>
+      <section id="photo-upload-success" class="upload-success" role="status" aria-live="polite" aria-atomic="true" hidden>
+        <span class="success-check" aria-hidden="true">✓</span>
+        <h3 id="photo-upload-success-title">¡Listo!</h3>
+        <p id="photo-upload-success-detail"></p>
+        <div class="upload-success-actions"><button id="photo-upload-view" class="button button-primary" type="button">Ver en el álbum <span aria-hidden="true">↗</span></button><button id="photo-upload-another" class="button button-outline" type="button">Subir más fotos <span aria-hidden="true">＋</span></button></div>
+        <figure class="success-easter-egg"><img src="assets/images/chas/WhatsApp%20Image%202026-10-29%20at%2017.25.10.jpeg" alt="Chas con expresión muy seria"><figcaption>yo, celebrando por dentro</figcaption></figure>
+      </section>
+    </form>
+  </dialog>
 </body>
 </html>

@@ -1,6 +1,7 @@
 'use strict';
 
-const memories = window.chasMemories;
+const seedMemories = window.chasMemories;
+let guestMemories = [];
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const grid = $('#photo-grid');
@@ -8,18 +9,20 @@ const photoDialog = $('#photo-dialog');
 const contributeDialog = $('#contribute-dialog');
 let activeFilter = 'all';
 let activeMemoryId = null;
-let detailSequence = memories;
+let detailSequence = seedMemories;
 let lastDialogTrigger = null;
+let highlightedMemoryIds = new Set();
 
 function filteredMemories() {
-  return activeFilter === 'all' ? memories : memories.filter((item) => item.tags.includes(activeFilter));
+  const all = [...seedMemories, ...guestMemories];
+  return activeFilter === 'all' ? all : seedMemories.filter((item) => item.tags.includes(activeFilter));
 }
 function renderAlbum() {
   const items = filteredMemories();
   grid.replaceChildren();
   items.forEach((item) => {
     const article = document.createElement('article');
-    article.className = `memory-card${item.wide ? ' wide' : ''}`;
+    article.className = `memory-card${item.wide ? ' wide' : ''}${highlightedMemoryIds.has(item.id) ? ' newly-added' : ''}`;
     const button = document.createElement('button');
     button.className = 'memory-button';
     button.dataset.photo = item.id;
@@ -36,7 +39,8 @@ function renderAlbum() {
     if (item.position) img.style.objectPosition = item.position;
     const number = document.createElement('span');
     number.className = 'photo-number';
-    number.textContent = String(memories.indexOf(item) + 1).padStart(2, '0');
+    const position = [...seedMemories, ...guestMemories].findIndex((memory) => memory.id === item.id) + 1;
+    number.textContent = String(position).padStart(2, '0');
     number.setAttribute('aria-hidden', 'true');
     const arrow = document.createElement('span');
     arrow.className = 'photo-open';
@@ -48,12 +52,12 @@ function renderAlbum() {
     title.textContent = item.title;
     const hint = document.createElement('span');
     hint.className = 'memory-hint';
-    hint.textContent = 'Esta foto necesita contexto…';
+    hint.textContent = item.origin === 'guest' ? `Por ${item.uploaderLabel}` : 'Esta foto necesita contexto…';
     button.append(frame, title, hint);
     article.append(button);
     grid.append(article);
   });
-  $('#album-count').textContent = `${items.length} ${items.length === 1 ? 'recuerdo' : 'recuerdos'}${activeFilter === 'all' ? ' para empezar. Y espacio para muchos más.' : ` de ${memories.length} en el álbum.`}`;
+  $('#album-count').textContent = `${items.length} ${items.length === 1 ? 'recuerdo' : 'recuerdos'}${activeFilter === 'all' ? ' en este álbum que sigue creciendo.' : ` de ${seedMemories.length} recuerdos originales.`}`;
 }
 function showDialog(dialog, trigger) {
   lastDialogTrigger = trigger || document.activeElement;
@@ -80,6 +84,7 @@ function displayMemory(item) {
   $('#detail-image').alt = item.description;
   $('#detail-title').textContent = item.title;
   $('#detail-caption').textContent = item.description;
+  $('#detail-uploader').textContent = item.origin === 'guest' ? `Sumada por ${item.uploaderLabel}` : '';
   $('#detail-position').textContent = `${detailSequence.indexOf(item) + 1} / ${detailSequence.length}`;
   photoDialog.dataset.photoId = item.id;
   photoDialog.dispatchEvent(new CustomEvent('memory:change', { detail: { photoId: item.id } }));
@@ -87,10 +92,11 @@ function displayMemory(item) {
   $('#detail-content').scrollTop = 0;
 }
 function openMemory(id, trigger) {
-  const item = memories.find((entry) => entry.id === id);
+  const all = [...seedMemories, ...guestMemories];
+  const item = all.find((entry) => entry.id === id);
   if (!item) return;
   const filtered = filteredMemories();
-  detailSequence = filtered.some((entry) => entry.id === id) ? filtered : memories;
+  detailSequence = filtered.some((entry) => entry.id === id) ? filtered : all;
   displayMemory(item);
   showDialog(photoDialog, trigger);
 }
@@ -129,31 +135,6 @@ $('#random-photo').addEventListener('click', (event) => {
   const items = filteredMemories();
   openMemory(items[Math.floor(Math.random() * items.length)].id, event.currentTarget);
 });
-const contributionTypes = {
-  photo: ['La foto que solo tienes tú', 'Aquí podrás elegir hasta 5 fotos por selección, revisarlas y sumarles unas palabras. Las fotos de la fiesta formarán parte de este mismo álbum.', 'Me falta tu parte del recuerdo.'],
-  memory: ['¿Te acuerdas de aquella vez…?', 'Aquí podrás contar una historia y elegir si aparece tu nombre. Algunos de mis mejores recuerdos no tienen foto.', 'Las buenas historias merecen su página.'],
-  audio: ['Tu voz también es un recuerdo', 'Aquí podrás grabar o adjuntar un audio, escucharlo antes de enviarlo y dejarme un mensaje con tu propia voz.', 'Por ahora, el micrófono sigue descansando.'],
-  gossip: ['A ver, cuéntame el contexto', 'Aquí podrás contarme el chisme con cariño, con nombre o sin nombre público. Si es sobre una foto, ya puedes contarlo al abrir ese recuerdo.', 'Con cariño. Siempre con cariño.'],
-};
-function renderContribution(kind) {
-  const [title, text, aside] = contributionTypes[kind];
-  const panel = $('#contribution-preview');
-  panel.replaceChildren();
-  const heading = document.createElement('h3');
-  heading.textContent = title;
-  const description = document.createElement('p');
-  description.textContent = text;
-  const note = document.createElement('span');
-  note.className = 'handwritten';
-  note.textContent = aside;
-  panel.append(heading, description, note);
-  $$('[data-kind]').forEach((button) => {
-    const selected = button.dataset.kind === kind;
-    button.classList.toggle('selected', selected);
-    button.setAttribute('aria-pressed', String(selected));
-  });
-}
-$$('[data-kind]').forEach((button) => button.addEventListener('click', () => renderContribution(button.dataset.kind)));
 let confettiTimeout;
 $('#celebrate').addEventListener('click', () => {
   $('#celebration-status').textContent = '¡Feliz cumple, Chas!';
@@ -196,5 +177,41 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 window.addEventListener('resize', updateActiveNavigation);
 renderAlbum();
-renderContribution('photo');
 updateActiveNavigation();
+
+window.chasAlbum = Object.freeze({
+  setGuestPhotos(items) {
+    const loadedIds = new Set(items.map((item) => item.id));
+    guestMemories = [...items, ...guestMemories.filter((item) => !loadedIds.has(item.id))]
+      .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    renderAlbum();
+  },
+  addGuestPhotos(items) {
+    const ids = new Set(items.map((item) => item.id));
+    guestMemories = [...items, ...guestMemories.filter((item) => !ids.has(item.id))]
+      .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    renderAlbum();
+  },
+  hasPhoto(id) {
+    return seedMemories.some((item) => item.id === id) || guestMemories.some((item) => item.id === id);
+  },
+  revealPhotos(ids) {
+    highlightedMemoryIds = new Set(ids);
+    activeFilter = 'all';
+    $$('[data-filter]').forEach((filter) => {
+      const selected = filter.dataset.filter === 'all';
+      filter.classList.toggle('active', selected);
+      filter.setAttribute('aria-pressed', String(selected));
+    });
+    renderAlbum();
+    requestAnimationFrame(() => {
+      const first = ids.length ? document.querySelector(`[data-photo="${ids[0]}"]`) : null;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      (first?.closest('.memory-card') || $('#album')).scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+      setTimeout(() => {
+        highlightedMemoryIds.clear();
+        $$('.memory-card.newly-added').forEach((card) => card.classList.remove('newly-added'));
+      }, 4500);
+    });
+  },
+});

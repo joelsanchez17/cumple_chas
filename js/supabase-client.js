@@ -65,4 +65,30 @@
       return request((db) => db.from('photo_comments').insert({ photo_id, name, content, is_anonymous }));
     },
   });
+  const PHOTO_BUCKET = 'guest-photos';
+  window.chasGuestPhotosApi = Object.freeze({
+    read() {
+      return request((db) => db.from('photos')
+        .select('id,storage_path,uploader_name,caption,is_anonymous,created_at')
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false }));
+    },
+    publicUrl(storagePath) {
+      return getClient().storage.from(PHOTO_BUCKET).getPublicUrl(storagePath).data.publicUrl;
+    },
+    async upload(storagePath, blob) {
+      const { data, error } = await getClient().storage.from(PHOTO_BUCKET).upload(storagePath, blob, {
+        contentType: blob.type,
+        cacheControl: '3600',
+        upsert: false,
+      });
+      if (error) throw error;
+      return data;
+    },
+    create(payload) {
+      return request((db) => db.from('photos').insert(payload)
+        .select('id,storage_path,uploader_name,caption,is_anonymous,created_at')
+        .single());
+    },
+  });
 })();

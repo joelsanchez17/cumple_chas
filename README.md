@@ -12,6 +12,30 @@ python3 -m http.server 8000
 
 Open http://localhost:8000/#para-chas. Internet access is required for the Supabase browser client and the shared message database. The gallery uses local image files.
 
+## Guest photo uploads
+
+The **Sumar** sheet accepts batches of up to five JPEG, PNG or WebP files. `js/photo-upload.js` contains reusable validation, stable-ID, payload, batch and browser-compression helpers. `js/guest-photos.js` owns the upload form, per-photo previews/captions/status, guest-photo loading and album mapping. `js/supabase-client.js` reuses the existing public client for the `guest-photos` bucket and `public.photos`.
+
+Before upload, each image is decoded in the browser with its embedded orientation, resized proportionally so its longest edge is at most **1920 px**, drawn onto a canvas and encoded as **WebP at quality 0.84**. If the browser cannot produce WebP, it falls back to **JPEG at quality 0.86**. No original image is sent first. The compressed result must remain below the bucket's 10 MB limit.
+
+Every object path is generated as `uploads/<crypto.randomUUID()>.webp` (or `.jpg` for the fallback). Uploads always use `upsert: false`. Storage succeeds before the row is inserted into `public.photos`; the row contains `storage_path`, the optional `caption`, `uploader_name` or `null`, and `is_anonymous`. The insert returns the database UUID. If that insert fails, the client does not attempt a forbidden delete: it logs the storage path for administrative cleanup, warns the guest not to resend that item, and leaves the possible orphan documented here.
+
+Rows are loaded newest first and their public Storage URLs are rendered after the 19 unchanged original memories. A guest row with UUID `<uuid>` gets application/comment ID `guest-<uuid>`. That stable value is passed unchanged to the existing `photo_comments.photo_id` reads and writes, so guest photos use the same modal, named/anonymous comments, drafts, pagination and failure handling as original photos.
+
+Batch progress is item-based (preparing, uploading, registering, finished), because the Supabase browser upload API does not expose byte progress. When only part of a batch succeeds, successful items are locked and skipped on retry; connection/upload failures remain with their preview and caption. A post-upload metadata failure is not automatically retried because doing so would create another Storage object.
+
+Manual upload test:
+
+1. Start the local server, open the site on a phone-sized viewport, tap **Sumar**, and choose one supported photo. Confirm its preview, add context, enter a name, and submit. Watch the explicit preparation, numbered upload and album-registration stages.
+2. Confirm the large **¡Listo!** state appears. Test **Subir más fotos**, then upload again and use **Ver en el álbum**; the sheet should close, the album should scroll into view and the new memory should be briefly highlighted. Open it and verify its caption, uploader, previous/next navigation, and named then anonymous comments. Reload and confirm both photo and comments persist.
+3. Repeat with **Sin nombre** and verify the album shows **Anónimo**, not the previously typed name.
+4. Select five photos and remove one before submitting. Then try selecting six at once, or four followed by two more; the selection must be rejected with the five-photo explanation.
+5. Try a non-image or unsupported HEIC/GIF file. It must not upload and the UI must explain the accepted formats.
+6. In developer tools, inspect a compressed upload: its longest dimension is at most 1920 px, normally uses WebP, is much smaller than the original, and the Storage request does not overwrite. Inspect the following `photos` insert payload and returned UUID.
+7. Simulate partial failure by taking the browser offline during a multi-photo batch. Restore connectivity and retry: completed items must not upload again, while retryable items remain available.
+8. Block only the `photos` insert after allowing Storage. Confirm the friendly warning, the technical console entry with `storagePath`, and that the browser makes no DELETE request. Clean that orphan later with administrative credentials if needed.
+9. Block the guest-photo SELECT and reload. The 19 originals must remain usable with an honest guest-photo error state.
+
 ## Para Chas messages
 
 The official supabase-js v2 browser client is loaded from a pinned jsDelivr CDN URL in `index.html`. Project URL and publishable key live together in `js/supabase-client.js`. This is public browser configuration; database access remains governed by the existing Supabase grants and RLS policies.
@@ -36,8 +60,11 @@ No dependency installation is needed:
 ```sh
 node tests/messages.test.cjs
 node tests/photo-comments.test.cjs
+node tests/guest-photos.test.cjs
 node --check js/app.js
 node --check js/photos.js
+node --check js/photo-upload.js
+node --check js/guest-photos.js
 node --check js/photo-comments.js
 node --check js/messages.js
 node --check js/supabase-client.js
@@ -69,4 +96,4 @@ To test locally:
 
 Manual submissions are real public comments. Automated tests use mocks and do not write to Supabase. Comment tests cover permanent IDs, modal navigation, scoped reads, named/anonymous validation, safe rendering, successful and failed inserts, per-photo drafts, read retries, stale responses and navigating during a pending submission. Existing message tests remain unchanged.
 
-Photo uploads, audio and other contribution flows remain frontend previews. No Netlify configuration is included.
+Audio and other contribution types are not implemented. No Netlify configuration is included.
