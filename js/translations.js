@@ -174,11 +174,11 @@ window.chasTranslations = Object.freeze({
     "zh-CN": "又一年，新的故事"
   },
   "copy.c025": {
-    "es": "de Perú para el mundo",
-    "en": "from Peru to the world",
-    "de": "aus Peru in die Welt",
-    "pt": "do Peru para o mundo",
-    "zh-CN": "从秘鲁走向世界"
+    "es": "de Cusco para el mundo",
+    "en": "from Cusco to the world",
+    "de": "aus Cusco in die Welt",
+    "pt": "de Cusco para o mundo",
+    "zh-CN": "从 Cusco 走向世界"
   },
   "copy.c026": {
     "es": "que no me falte el baile",
@@ -286,11 +286,11 @@ window.chasTranslations = Object.freeze({
     "zh-CN": "和我的朋友在一起最好"
   },
   "copy.c041": {
-    "es": "Mis amigos, Juanse y mi Perú.",
-    "en": "My friends, Juanse and my Peru.",
-    "de": "Meine Freunde, Juanse und mein Peru.",
-    "pt": "Meus amigos, Juanse e meu Peru.",
-    "zh-CN": "我的朋友、Juanse，还有我的秘鲁。"
+    "es": "Mis amigos, Juanse y mi Cusco.",
+    "en": "My friends, Juanse and my Cusco.",
+    "de": "Meine Freunde, Juanse und mein Cusco.",
+    "pt": "Meus amigos, Juanse e minha Cusco.",
+    "zh-CN": "我的朋友、Juanse，还有我的家乡 Cusco。"
   },
   "copy.c042": {
     "es": "Los llevo conmigo, esté donde esté.",
@@ -2909,5 +2909,19 @@ window.chasTranslations = Object.freeze({
     "de": "Die Installation ließ sich nicht öffnen. Versuch es über das Menü deines Browsers.",
     "pt": "Não foi possível abrir a instalação. Tente pelo menu do navegador.",
     "zh-CN": "暂时无法打开安装窗口，请试试浏览器菜单。"
+  },
+  "about.violetta": {
+    "es": "Y sí, tengo mi lado Violetta. ♪",
+    "en": "And yes, I have a Violetta side too. ♪",
+    "de": "Und ja, ein bisschen Violetta steckt auch in mir. ♪",
+    "pt": "E sim, também tenho meu lado Violetta. ♪",
+    "zh-CN": "没错，我也有喜欢 Violetta 的一面。♪"
+  },
+  "about.machuPicchu": {
+    "es": "Machu Picchu",
+    "en": "Machu Picchu",
+    "de": "Machu Picchu",
+    "pt": "Machu Picchu",
+    "zh-CN": "Machu Picchu"
   }
 });

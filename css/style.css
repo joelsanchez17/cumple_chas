@@ -2703,3 +2703,25 @@ h2,h3 { overflow-wrap:anywhere; }
 @media(max-width:760px) {
   .pwa-install { padding-bottom:calc(90px + env(safe-area-inset-bottom)); }
 }
+
+/* Small original geometric accents; the paper palette remains dominant. */
+.cusco-stitch { display:block; margin:0 auto 16px; }
+.note-teal::after {
+  content:'';
+  position:absolute;
+  right:22px;
+  bottom:12px;
+  width:42px;
+  height:3px;
+  background:linear-gradient(to right,#8e2938 20%,#2c62ad 20% 40%,#427c55 40% 60%,#765087 60% 80%,var(--gold) 80%);
+}
+.cusco-keepsake {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:14px 0 4px;
+  color:#306c69;
+}
+.cusco-keepsake svg { flex-shrink:0; }
+.cusco-keepsake figcaption { min-width:0; font-size:10px; line-height:1.5; }
+.personality-note .violetta-note { margin:12px 0 0; font-size:11px; color:var(--ink); }

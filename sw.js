@@ -1,7 +1,7 @@
 'use strict';
 
 // Bump VERSION whenever changing the shell or its asset list for a release.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const PREFIX = 'chas-album-';
 const SHELL_CACHE = `${PREFIX}shell-${VERSION}`;
 const IMAGE_CACHE = `${PREFIX}images-${VERSION}`;

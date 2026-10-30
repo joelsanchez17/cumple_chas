@@ -223,7 +223,7 @@ The site can be installed from a supported browser on **HTTPS**, or tested on lo
 
 ### Cache and update policy
 
-`sw.js` uses versioned **`chas-album-shell-v2`** and **`chas-album-images-v2`** caches. Install precaches the HTML, CSS, every local JS file, manifest, launcher icons/favicon, hero portrait and small serious portrait. Successful activation claims clients and deletes only obsolete `chas-album-*` caches, preserving unrelated caches on the origin.
+`sw.js` uses versioned **`chas-album-shell-v3`** and **`chas-album-images-v3`** caches. Install precaches the HTML, CSS, every local JS file, manifest, launcher icons/favicon, hero portrait and small serious portrait. Successful activation claims clients and deletes only obsolete `chas-album-*` caches, preserving unrelated caches on the origin.
 
 Subsequent allowlisted static requests are **network first** with HTTP revalidation (`cache: 'no-cache'`); a network failure or static-host 5xx can fall back to the saved response. Full/unavailable cache storage does not prevent a successful network response. Curated JPEGs under `/assets/images/chas/` are cached only as requested, bounded to **21 entries** (the current local image collection is about 6 MB). This is not a download of the whole gallery at install time. Photos never opened/cached may be unavailable offline.
 
@@ -270,3 +270,14 @@ Platform references: [MDN: install prompt event](https://developer.mozilla.org/e
 Final verification for this PWA change: **105/105 tests passed** (90 existing + 15 PWA), all JavaScript syntax checks and `git diff --check` passed. Chromium completed **8 PWA checks and 13 existing-flow check groups**, with zero uncaught page exceptions, zero overflow cases across the 25 language/viewport combinations, and zero axe violations in the four sampled views. All browser writes were intercepted; no real Supabase mutations occurred.
 
 Photo-icon revision: manifest, Apple metadata and shell-cache references now point to the photo-specific filenames. Only the cache version was bumped to v2; service worker strategy, Supabase, install logic and translations remain unchanged.
+
+
+## Personal details: Cusco, Machu Picchu and Violetta
+
+The existing celebration ribbon now says **de Cusco para el mundo**, and the third **Muy, muy Chas** note mentions **mi Cusco** alongside her people. Existing Peru references remain. A 100×10 inline SVG divider with five small colored diamonds and a 42×3 corner accent use deeper red, blue, green, purple and marigold as textile-inspired details; no cultural meanings are assigned to their colors or shapes.
+
+An original 94×47 inline SVG mountain/terrace sketch labeled **Machu Picchu** sits inside the third note. It is decorative, secondary and locally authored. The first note adds **Y sí, tengo mi lado Violetta. ♪** as a small personal reference; no promotional imagery, logos, characters, music files or external Violetta assets were added. Both updated phrases and the new captions use the existing five-language catalogue, preserving proper names.
+
+The service-worker cache version moves from **v2 to v3** because cached HTML/CSS/translations changed. No new cache URLs are required for inline SVGs, and the caching strategy is unchanged. All four photo PWA icons are byte-for-byte unchanged (SHA-256 verified), as are the manifest and Supabase/install logic.
+
+Validation: **105/105 automated tests**, JavaScript syntax and `git diff --check` passed. Chromium checked all five languages at 320, 375, 393, 768 and 1280 px: zero page overflow, matching translated details, zero uncaught exceptions, a valid manifest and an active v3 shell cache. The five mobile about-section axe checks reported zero violations. Browser Supabase calls were mocked; no real mutations were made.
