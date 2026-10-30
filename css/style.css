@@ -399,7 +399,7 @@ h1>span:first-of-type {
   font-size:23px;
 }
 .note-teal .handwritten {
-  color:var(--teal);
+  color:#306c69;
 }
 .note-link {
   font-size:12px;
@@ -1862,7 +1862,7 @@ button:disabled {
   border:1px dashed #377c7866;
   border-radius:6px;
   background:#fffaf180;
-  color:var(--teal);
+  color:#306c69;
   font-family:var(--serif);
   font-size:18px;
   text-align:center;
@@ -2579,6 +2579,7 @@ html.party-welcome-open {
   outline-offset:4px;
 }
 .party-discovery {
+  --muted:#6d5e65;
   background:#e6e9dc;
   border:1px solid #377c7830;
   padding:25px;
@@ -2671,3 +2672,11 @@ html.party-welcome-open {
 .celebration-feedback:empty { margin:0; }
 h2,h3 { overflow-wrap:anywhere; }
 @media(max-width:760px) { .header-extras .header-note { display:none; } .header-extras { gap:0; } .language-picker select { max-width:112px; } .celebration-count { font-size:9px; } .hero-actions { align-items:flex-start; } }
+
+/* Keep translated header/hero copy within narrow phone screens. */
+@media(max-width:760px) {
+  .site-header { gap:12px; }
+  .site-header .brand { white-space:normal; min-width:0; }
+  .header-extras { flex-shrink:0; }
+  .hero-hand { position:static; margin:22px 0 0; text-align:right; }
+}

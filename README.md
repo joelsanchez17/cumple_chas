@@ -192,3 +192,20 @@ The header language picker offers **ES, EN, DE, PT, 中文**. Spanish is the def
 8. Check a narrow phone viewport, keyboard focus, the language selector and reduced-motion mode. Confetti animation remains suppressed with reduced motion; the shared insertion still works.
 
 Run **`node --test tests/*.test.cjs`** for all suites. `tests/i18n-celebrations.test.cjs` covers the real catalogue and a small DOM fixture, language defaults/persistence, live dynamic translation, all five locales, guest-content boundaries, singular/plural templates, exact count reads, inserts, cooldown and failure states. All automated Supabase calls are mocked: tests create no real records. Browser layout, native microphone permissions and device playback still require the manual checks above.
+
+## Production-readiness audit — 2026-10-30
+
+Only small safety fixes were needed: a local SVG favicon, narrow-screen wrapping for translated header text, normal mobile flow for the handwritten hero annotation so it cannot overlap the celebration count, and slightly darker text in three locations to meet contrast requirements. No backend schemas, RLS, features or dependencies were changed.
+
+Validation completed:
+
+- All **90 automated tests** passed: guest photos 12, internationalization/celebrations 11, messages 12, party 17, photo comments 15, voice 23. JavaScript syntax and `git diff --check` passed.
+- Chromium exercised the real page and Supabase browser SDK. Live reads of all six tables succeeded with zero rows, displaying honest empty states and retaining all 19 curated memories. Automated browser writes and Storage uploads were intercepted; no real records/files were created.
+- Browser checks covered welcome/session behavior, counter insert/read/cooldown, roulette, game answers, named/anonymous messages, per-photo comments/drafts, actual browser image compression, native MediaRecorder with a simulated microphone, local/saved audio playback, upload failure/retry and failed-read/insert recovery. Guest content stayed unchanged during language switching.
+- All five languages were checked at **320, 375, 393, 768 and 1280 px**, with no page overflow after the fixes. The open photo modal, upload form, audio preview and current game result retained their state while switching language. Language preference survived reload.
+- axe-core WCAG A/AA checks found **zero violations** in the mobile welcome, homepage, photo detail and populated-page snapshots. No uncaught JavaScript errors or normal-load console errors occurred; deliberately simulated failures produced the expected technical diagnostics.
+- All 19 curated image URLs responded successfully. Static HTML has 146 unique IDs, valid ARIA/label targets and alt attributes on every image. No `Zone.Identifier` files, private credentials, service-role JWTs, database passwords or PostgreSQL URLs were detected in the current repository files. The publishable key remains intentionally public.
+
+Remaining verification before/after hosting: real iOS Safari and Android Chrome microphone permissions, speaker playback and device layouts; HTTPS on the deployment origin; one intentional end-to-end production submission for each integration if desired. Live INSERT/RLS and Storage write permissions were not exercised by this audit. There were no saved guest images/audio to verify against Storage after the cleanup. Public submissions still rely on the existing RLS/validation and client cooldown; authentication, moderation and server-side rate limiting remain outside this frontend scope. The celebration total refreshes on load/after celebrating, without realtime subscriptions. Existing upload-orphan recovery limitations are documented above.
+
+The browser audit tools were installed only in `/tmp`; the site remains dependency-free vanilla HTML/CSS/JavaScript. Browser evidence supplements the repository tests and does not replace real-device checks.
