@@ -7,7 +7,7 @@
   const nameInput = document.querySelector('#comment-name');
   const anonymousInput = document.querySelector('#comment-anonymous');
   const submitButton = document.querySelector('#comment-submit');
-  const submitLabel = submitButton.textContent;
+  const submitLabel = 'Guardar mi comentario ↗';
   const formStatus = document.querySelector('#comment-status');
   const list = document.querySelector('#comments-list');
   const listStatus = document.querySelector('#comments-status');
@@ -89,9 +89,11 @@
     card.className = 'message-card photo-comment';
     const content = document.createElement('p');
     content.className = 'message-content';
+    content.setAttribute('translate', 'no');
     content.textContent = comment.content;
     const author = document.createElement('h4');
     author.className = 'message-signature';
+    author.setAttribute('translate', !comment.is_anonymous && comment.name?.trim() ? 'no' : 'yes');
     author.textContent = comment.is_anonymous ? 'Anónimo' : (comment.name?.trim() || 'Sin firma');
     card.append(content, author);
     if (comment.created_at) {

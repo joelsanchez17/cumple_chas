@@ -61,6 +61,7 @@ No dependency installation is needed:
 node tests/messages.test.cjs
 node tests/photo-comments.test.cjs
 node tests/voice-messages.test.cjs
+node tests/party.test.cjs
 node tests/guest-photos.test.cjs
 node --check js/app.js
 node --check js/photos.js
@@ -140,3 +141,54 @@ If an insert is confirmed but the subsequent list refresh fails, the success pan
 Run `node tests/voice-messages.test.cjs` for mocked recorder, MIME, permissions, size/duration, author payload, path, upload/metadata failure, playback rendering, UI lifecycle and adapter tests. Automated tests never create live recordings or Storage objects. Browser/microphone behavior still needs the real-device checks above.
 
 Deferred: Netlify, QR codes, authentication, moderation/admin tools, audio editing/deletion and likes.
+
+
+## Party layer
+
+A compact **Un ratito de fiesta** section follows **Para Chas**. The handwritten header link jumps to it. Existing albums, upload flows, comments, messages and voice recording remain separate and usable.
+
+- `js/celebration.js` handles the welcome dialog and the existing hero confetti button. It writes only the `chas:welcome:v1` flag to `sessionStorage` when the welcome is first shown. **Entrar** (or Escape) dismisses it, restores focus and makes a small confetti burst. Reloads and section navigation do not show it again in that session. If storage is blocked, entry still works, although a later reload may show the panel again. Reduced motion disables the drop/exit animation and confetti particles. Confetti has a shared 2.5-second cooldown and is limited to 28 small, noninteractive particles.
+- `js/party-data.js` contains ten prompts with explicit permanent descriptive IDs, eight roulette challenges, selection/rotation helpers and payload validation. Preserve prompt IDs when changing wording or order. Roulette outcomes stay local and are never sent to Supabase.
+- `js/party.js` animates the wheel, announces the selected challenge and routes **Hacerlo** to the existing upload dialog, voice tab, text form, a photo detail, or the innocent-gossip question. It never records, uploads or submits on the guest's behalf. The toast challenge is a social action with no pretend website operation. Reduced-motion mode shows the random outcome immediately.
+- The `chasPartyAnswersApi` in `js/supabase-client.js` shares the existing publishable client. It SELECTs real `party_answers` rows newest first, in pages of 50, and INSERTs `prompt_id`, `answer`, `name`, `is_anonymous`. Named posts need a trimmed nonempty name (up to 50 characters); answers allow up to 1000 characters. Anonymous posts send `name: null` and `is_anonymous: true`. The UI explicitly says the name will not be displayed or saved with that answer; it makes no promise of absolute technical anonymity.
+- Discovery shows one actual saved answer at a time, with its question and safe author text. **Ver otra respuesta** chooses another loaded row without immediately repeating the same one. **Buscar más respuestas** loads another page when available. Empty states and errors never manufacture cards, counters or responses. IDs are used internally only. Errors keep drafts; a confirmed write followed by a failed refresh is reported as saved.
+- The inspected serious portrait was renamed from `WhatsApp Image 2026-10-29 at 17.25.10.jpeg` to `assets/images/chas/chas-serious.jpeg`. It appears only as a small “te leo” joke beside the game, never as a curated or guest memory. The 19 seed photo IDs and assets are unchanged.
+
+### Exact manual party test
+
+1. Run `python3 -m http.server 8000`, then open http://localhost:8000 in a fresh session. To reset just the welcome flag for testing, run `sessionStorage.removeItem('chas:welcome:v1')` in the browser console and reload.
+2. Check the welcome drops in, **Entrar** exits cleanly and confetti appears briefly. Refresh and navigate between sections: the panel must stay dismissed. Escape should also allow entry. A new session should show the welcome again.
+3. Tap **Un poquito de fiesta** in the hero repeatedly: only one burst should occur within 2.5 seconds. Emulate `prefers-reduced-motion: reduce` in browser developer tools and repeat; no confetti particles, welcome movement or wheel animation should run.
+4. Follow **¿un ratito de fiesta?** or scroll below the saved voice messages. Spin the wheel: it should rotate, stop with the selected sector beneath the pointer and announce a challenge. Double tapping while it spins must not start a second spin.
+5. Try **Hacerlo** for photo, audio, note and comment outcomes. They should open or scroll to the existing feature without sending anything or requesting the microphone automatically. The innocent-gossip outcome selects its game question. The toast outcome is an offline invitation.
+6. In **Chisme o verdad**, try a blank answer or a missing name. Neither should publish. Type an answer, change questions and return: the unsent answer is retained for that question during this page visit.
+7. Submit a named answer, then an unnamed one. Confirm success, cleared form and real answer cards after refresh. Inspect the `party_answers` POST: unnamed answers must have `name: null`, `is_anonymous: true`. Manual submissions are real public records.
+8. Use **Ver otra respuesta** to discover different saved cards. With an empty table, verify the honest invitation to leave the first answer. No example answers should appear. Check the small serious portrait is absent from the hero and both photo collections.
+9. Go offline before submitting. The draft must remain and the error must be friendly. Restore connectivity, click **Actualizar** and check for your answer before resending if the response was lost.
+10. Check on a narrow phone screen, keyboard navigation and reduced-motion mode. Retest a text message, photo comment, guest photo upload and voice recording to confirm those flows still behave as before.
+
+`node tests/party.test.cjs` tests welcome-session behavior, reduced motion, confetti cooldown, all wheel outcomes and pointer alignment, action routing, stable question IDs, anonymous/named payloads, real-answer rendering, empty states, drafts and failure handling. All automated data calls are mocked; tests never create live Supabase answers.
+
+## Shared celebrations and interface languages
+
+The header language picker offers **ES, EN, DE, PT, 中文**. Spanish is the default, regardless of browser locale. The selection updates `<html lang>` immediately and is saved under `localStorage['chas:language']`; unsupported values are ignored. If storage is blocked, switching still works for the current visit.
+
+- `js/translations.js` is the dedicated catalogue: 406 stable keys, each with Spanish, English, informal German, Portuguese and Simplified Chinese copy. Keep the existing keys when editing wording; add new keys rather than renumbering `copy.cNNN` entries. Seed captions, questions, wheel challenges, accessibility labels, validations and error/success states are included.
+- `js/i18n.js` binds Spanish interface source phrases to catalogue keys and retains each node's original source in WeakMaps. A batched MutationObserver translates newly inserted text and accessibility attributes, so open photo details, upload progress, recording states, roulette results and questions switch without reload or resetting drafts. New interface copy needs a catalogue entry; unmapped text is left unchanged rather than displaying a raw key. `t()` throws for missing keys, and tests check catalogue completeness and current static copy.
+- Explicit `data-i18n-html` keys translate complete authored headings with trusted markup. `data-i18n-text` / `data-i18n-aria-label` / `data-i18n-alt` and JSON `data-i18n-params` support ambiguous labels and opaque guest parameters. A parameter `{ "key": "copy.c145" }` localizes an anonymous label; a string parameter remains untouched. `explicitOnly` catalogue entries prevent curated labels from accidentally matching identical guest captions or names.
+- Guest content and real author nodes have `translate="no"`; input/textarea values and audio are never translated. Names/captions embedded in interface labels remain opaque parameters. Dates use the chosen locale. Changing language never modifies Supabase data or replays an action.
+- `js/celebration.js` reuses the existing confetti button and displays the exact shared count. The adapter in `js/supabase-client.js` makes an exact-count HEAD SELECT on `public.celebrations`; every deliberate **Celebrar a Chas** click makes one INSERT with a fresh UUID, then rereads the count. Only the existing publishable client is used. No UPDATE, DELETE, fake count, automatic retry or realtime subscription is added. Other visitors' celebrations appear on reload or after another successful celebration.
+- Confetti and button submissions have a 2.5-second cooldown; an outstanding request keeps the button disabled longer if necessary. Welcome-entry confetti never inserts a celebration. Failed inserts leave the known count unchanged; a failed refresh after a confirmed insert explicitly says it was saved. A lost insert response is reported as unconfirmed, with no optimistic increment.
+
+### Exact manual test procedure
+
+1. Run `python3 -m http.server 8000` in the repository root. Open **http://localhost:8000/** with internet access. For a clean language test, run `localStorage.removeItem('chas:language')` in the browser console and reload: the site should start in Spanish even if the browser language differs.
+2. Select **EN**, **DE**, **PT**, **中文**, then **ES**. Check navigation, headings, seed captions, form placeholders, accessibility labels, questions and wheel challenges. Inspect `<html lang>`. Reload after selecting a language: it must remain selected. Repeat with localStorage blocked: switching should still work during the visit.
+3. Open a seed photo, then a guest photo. Switch language while the detail stays open. The interface/caption for curated photos should change; guest captions, comments and names must stay exactly as submitted. Type a draft and switch again: it should remain untouched. Verify the same behavior for birthday messages and saved game answers.
+4. Open **Sumar**, select a supported photo and type a caption. Switch language before publishing; controls/placeholders should change while the caption/name remain. Check validation and upload states. Try the audio recorder on localhost (HTTPS on a phone); switch language with the local preview visible. It must stay playable and must not upload just because the language changed. Explicit manual submissions create real public records/files.
+5. Spin the roulette and switch languages while the challenge is visible. Check the selected game question and saved-answer discovery without reloading. Existing action routing, uploads, messages, comments and voice submission should remain usable.
+6. Note the initial shared celebration count. After leaving the welcome dialog and its cooldown, press **Celebrar a Chas** once. Expect confetti, subtle confirmation, and the real updated total. Rapid taps must not create extra requests within 2.5 seconds. Inspect Network: one INSERT to `celebrations`, followed by an exact-count HEAD read; no UPDATE/DELETE. Open a second tab/reload to verify the shared total. Manual clicks create real celebration rows.
+7. Go offline and press the celebration button after its cooldown. Confetti may run; the total must not increase and friendly feedback must appear. Restore connectivity and reload to resolve any uncertain response. For the confirmed-write/read-failure case, block only HEAD reads to `celebrations` while leaving its POST enabled: the UI must distinguish a saved celebration from an unavailable total.
+8. Check a narrow phone viewport, keyboard focus, the language selector and reduced-motion mode. Confetti animation remains suppressed with reduced motion; the shared insertion still works.
+
+Run **`node --test tests/*.test.cjs`** for all suites. `tests/i18n-celebrations.test.cjs` covers the real catalogue and a small DOM fixture, language defaults/persistence, live dynamic translation, all five locales, guest-content boundaries, singular/plural templates, exact count reads, inserts, cooldown and failure states. All automated Supabase calls are mocked: tests create no real records. Browser layout, native microphone permissions and device playback still require the manual checks above.

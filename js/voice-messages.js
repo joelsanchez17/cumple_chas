@@ -198,6 +198,7 @@
     card.className = 'message-card voice-card';
     const author = document.createElement('h4');
     author.className = 'message-signature';
+    author.setAttribute('translate', !row.is_anonymous && row.name?.trim() ? 'no' : 'yes');
     author.textContent = row.is_anonymous ? 'Anónimo' : (row.name?.trim() || 'Sin firma');
     const detail = document.createElement('p');
     detail.className = 'voice-card-detail';
@@ -214,6 +215,7 @@
     player.preload = 'none';
     player.src = api.publicUrl(row.storage_path);
     player.setAttribute('aria-label', `Escuchar mensaje de ${author.textContent}`);
+    if (row.is_anonymous || !row.name?.trim()) player.setAttribute('data-i18n-aria-label', row.is_anonymous ? 'copy.c342' : 'copy.c343');
     const playbackStatus = document.createElement('p');
     playbackStatus.className = 'message-status';
     playbackStatus.setAttribute('role', 'status');

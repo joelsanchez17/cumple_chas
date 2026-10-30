@@ -52,6 +52,8 @@
       src: api.publicUrl(row.storage_path),
       title: caption || 'Un recuerdo compartido',
       description: caption || `Un recuerdo que sumó ${label}.`,
+      hasGuestCaption: Boolean(caption),
+      isAnonymousUploader: Boolean(row.is_anonymous || !row.uploader_name?.trim()),
       tags: [], origin: 'guest', uploaderLabel: label, createdAt: row.created_at,
     };
   }

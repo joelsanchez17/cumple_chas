@@ -6,7 +6,7 @@
   const nameInput = document.querySelector('#wish-name');
   const anonymousInput = document.querySelector('#wish-anonymous');
   const submitButton = document.querySelector('#wish-submit');
-  const submitLabel = submitButton.innerHTML;
+  const submitLabel = 'Enviar mi notita <span aria-hidden="true">↗</span>';
   const formStatus = document.querySelector('#wish-status');
   const list = document.querySelector('#messages-list');
   const listStatus = document.querySelector('#messages-status');
@@ -73,9 +73,11 @@
     card.className = 'message-card';
     const content = document.createElement('p');
     content.className = 'message-content';
+    content.setAttribute('translate', 'no');
     content.textContent = message.content;
     const signature = document.createElement('h4');
     signature.className = 'message-signature';
+    signature.setAttribute('translate', !message.is_anonymous && message.name?.trim() ? 'no' : 'yes');
     signature.textContent = message.is_anonymous ? 'Anónimo' : (message.name?.trim() || 'Sin firma');
     card.append(content, signature);
     if (message.created_at) {

@@ -17,6 +17,9 @@ let highlightedMemoryIds = new Set();
 function filteredMemories() {
   return activeFilter === 'all' ? seedMemories : seedMemories.filter((item) => item.tags.includes(activeFilter));
 }
+function uploaderParameters(item) {
+  return JSON.stringify({ 0: item.isAnonymousUploader ? { key: 'copy.c145' } : item.uploaderLabel });
+}
 function memoryCard(item, position) {
   const article = document.createElement('article');
   article.className = `memory-card${item.wide ? ' wide' : ''}${highlightedMemoryIds.has(item.id) ? ' newly-added' : ''}`;
@@ -24,11 +27,17 @@ function memoryCard(item, position) {
   button.className = 'memory-button';
   button.dataset.photo = item.id;
   button.setAttribute('aria-label', `Abrir recuerdo: ${item.title}`);
+  if (item.origin !== 'guest') button.setAttribute('data-i18n-aria-label', `photo.open.${item.id.slice(-3)}`);
   const frame = document.createElement('div');
   frame.className = 'memory-image';
   const img = document.createElement('img');
   img.src = item.src;
+  img.setAttribute('translate', item.origin === 'guest' && item.hasGuestCaption !== false ? 'no' : 'yes');
   img.alt = item.description;
+  if (item.origin === 'guest' && item.hasGuestCaption === false) {
+    img.setAttribute('data-i18n-alt', 'copy.c231');
+    img.setAttribute('data-i18n-params', uploaderParameters(item));
+  }
   img.loading = 'lazy';
   img.decoding = 'async';
   img.width = item.wide ? 2048 : 1536;
@@ -45,10 +54,15 @@ function memoryCard(item, position) {
   frame.append(img, number, arrow);
   const title = document.createElement('span');
   title.className = 'memory-title';
+  title.setAttribute('translate', item.origin === 'guest' && item.hasGuestCaption !== false ? 'no' : 'yes');
   title.textContent = item.title;
   const hint = document.createElement('span');
   hint.className = 'memory-hint';
   hint.textContent = item.origin === 'guest' ? `Por ${item.uploaderLabel}` : '¿Qué te nace decir?';
+  if (item.origin === 'guest') {
+    hint.setAttribute('data-i18n-text', 'copy.c212');
+    hint.setAttribute('data-i18n-params', uploaderParameters(item));
+  }
   button.append(frame, title, hint);
   article.append(button);
   return article;
@@ -89,6 +103,20 @@ function closeDialog(dialog) { dialog.close(); }
 function displayMemory(item) {
   activeMemoryId = item.id;
   $('#detail-image').src = item.src;
+  ['detail-image', 'detail-title', 'detail-caption'].forEach((id) => document.getElementById(id).setAttribute('translate', item.origin === 'guest' && item.hasGuestCaption !== false ? 'no' : 'yes'));
+  ['detail-image', 'detail-caption', 'detail-uploader'].forEach((id) => {
+    const element = document.getElementById(id);
+    element.removeAttribute('data-i18n-text');
+    element.removeAttribute('data-i18n-alt');
+    element.setAttribute('data-i18n-params', uploaderParameters(item));
+  });
+  if (item.origin === 'guest') {
+    $('#detail-uploader').setAttribute('data-i18n-text', 'copy.c213');
+    if (item.hasGuestCaption === false) {
+      $('#detail-caption').setAttribute('data-i18n-text', 'copy.c231');
+      $('#detail-image').setAttribute('data-i18n-alt', 'copy.c231');
+    }
+  }
   $('#detail-image').alt = item.description;
   $('#detail-title').textContent = item.title;
   $('#detail-caption').textContent = item.description;
@@ -146,27 +174,6 @@ $('#random-photo').addEventListener('click', (event) => {
   const items = filteredMemories();
   openMemory(items[Math.floor(Math.random() * items.length)].id, event.currentTarget);
 });
-let confettiTimeout;
-$('#celebrate').addEventListener('click', () => {
-  $('#celebration-status').textContent = '¡Feliz cumple, Chas!';
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const layer = $('#confetti');
-  layer.replaceChildren();
-  clearTimeout(confettiTimeout);
-  const colors = ['#ad3150', '#f2bc57', '#377c78', '#d68e68', '#382334'];
-  for (let index = 0; index < 55; index++) {
-    const piece = document.createElement('span');
-    piece.className = 'confetti-piece';
-    piece.style.left = `${Math.random() * 100}%`;
-    piece.style.background = colors[index % colors.length];
-    piece.style.animationDelay = `${Math.random() * .6}s`;
-    piece.style.setProperty('--drift', `${Math.random() * 180 - 90}px`);
-    piece.style.setProperty('--spin', `${Math.random() * 900 - 450}deg`);
-    if (index % 3 === 0) piece.style.borderRadius = '50%';
-    layer.append(piece);
-  }
-  confettiTimeout = setTimeout(() => layer.replaceChildren(), 3300);
-});
 function updateActiveNavigation() {
   const sections = ['inicio', 'album', 'para-chas'];
   let active = 'inicio';
@@ -192,6 +199,8 @@ renderGuestPhotos();
 updateActiveNavigation();
 
 window.chasAlbum = Object.freeze({
+  openPhoto(id, trigger) { openMemory(id, trigger); },
+  openUpload(trigger) { showDialog(contributeDialog, trigger); },
   setGuestPhotos(items) {
     const loadedIds = new Set(items.map((item) => item.id));
     guestMemories = [...items, ...guestMemories.filter((item) => !loadedIds.has(item.id))]

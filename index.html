@@ -7,17 +7,22 @@
   <meta name="description" content="Soy Chas. Mis viajes, mi gente y las historias que quiero guardar. Un álbum que empezó con un cumpleaños.">
   <title>Chas · Mi álbum de recuerdos</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js" defer></script>
+  <script src="js/i18n.js" defer></script>
   <script src="js/photos.js" defer></script>
   <script src="js/photo-upload.js" defer></script>
   <script src="js/app.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" defer></script>
   <script src="js/supabase-client.js" defer></script>
+  <script src="js/celebration.js" defer></script>
   <script src="js/guest-photos.js" defer></script>
   <script src="js/messages.js" defer></script>
   <script src="js/photo-comments.js" defer></script>
   <script src="js/voice-recorder.js" defer></script>
   <script src="js/voice-data.js" defer></script>
   <script src="js/voice-messages.js" defer></script>
+  <script src="js/party-data.js" defer></script>
+  <script src="js/party.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#inicio">Saltar al contenido</a>
@@ -29,16 +34,17 @@
       <button class="nav-item nav-add" data-contribute><span class="add-symbol" aria-hidden="true">+</span><span>Sumar</span></button>
       <a href="#para-chas" class="nav-item" data-section="para-chas"><span aria-hidden="true">♡</span><span>Para Chas</span></a>
     </nav>
-    <span class="header-note">mis fotos, mis historias</span>
+    <div class="header-extras"><a class="header-note" href="#fiesta">¿un ratito de fiesta? ↗</a><label class="language-picker"><span class="sr-only" data-i18n="language.label">Idioma de la página</span><select id="language-select" aria-label="Idioma de la página" translate="no"><option value="es">ES · Español</option><option value="en">EN · English</option><option value="de">DE · Deutsch</option><option value="pt">PT · Português</option><option value="zh-CN">中文</option></select></label></div>
   </header>
 
   <main>
     <section class="hero section-shell" id="inicio" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow"><span class="little-sun" aria-hidden="true">✷</span> MI CUMPLE FUE SOLO EL COMIENZO</p>
-        <h1 id="hero-title">Feliz cumple,<br><span>Chas</span><span class="title-spark" aria-hidden="true">✳</span></h1>
+        <h1 id="hero-title" tabindex="-1">Feliz cumple,<br><span>Chas</span><span class="title-spark" aria-hidden="true">✳</span></h1>
         <p class="hero-description">Soy Chas. Este es mi rincón para guardar viajes,<br>mi gente y algún que otro chisme.</p>
-        <div class="hero-actions"><a class="button button-primary" href="#album">Abrir el álbum <span aria-hidden="true">↗</span></a><button class="text-button" id="celebrate">Un poquito de fiesta <span aria-hidden="true">✧</span></button></div>
+        <div class="hero-actions"><a class="button button-primary" href="#album">Abrir el álbum <span aria-hidden="true">↗</span></a><div class="celebration-widget"><button class="text-button" id="celebrate">Celebrar a Chas <span aria-hidden="true">✧</span></button><span id="celebration-count" class="celebration-count" role="status" aria-live="polite">Cargando celebraciones…</span></div></div>
+        <p id="celebration-feedback" class="celebration-feedback" role="status" aria-live="polite"></p>
         <p class="handwritten hero-hand">Pasa, estás en mi álbum. <span aria-hidden="true">♡</span></p>
       </div>
       <div class="hero-portrait">
@@ -78,10 +84,10 @@
       <noscript><p>Activa JavaScript para ver las fotos compartidas por mi gente.</p></noscript>
     </section>
 
-    <section class="contribute-section" id="sumar" aria-labelledby="contribute-title"><div class="section-shell contribute-inner"><div class="contribute-art" aria-hidden="true"><span>+</span><i>tu parte<br>de la historia</i></div><div><p class="eyebrow">SEGURO TÚ TIENES OTRA VERSIÓN</p><h2 id="contribute-title">Mi historia no cabe<br>en <em>mis propias fotos.</em></h2><p>Quiero ver esa foto que solo tienes tú y guardar también tu parte de la historia.</p><button class="button button-primary" data-contribute>Sumar un recuerdo <span aria-hidden="true">+</span></button><p class="preview-note">Este rincón es compartido: las fotos y sus datos serán públicos para quienes lo visiten.</p></div></div></section>
+    <section class="contribute-section" id="sumar" aria-labelledby="contribute-title"><div class="section-shell contribute-inner"><div class="contribute-art" aria-hidden="true"><span>+</span><i>tu parte<br>de la historia</i></div><div><p class="eyebrow">SEGURO TÚ TIENES OTRA VERSIÓN</p><h2 id="contribute-title" data-i18n-html="heading.contribute">Mi historia no cabe<br>en <em>mis propias fotos.</em></h2><p>Quiero ver esa foto que solo tienes tú y guardar también tu parte de la historia.</p><button class="button button-primary" data-contribute>Sumar un recuerdo <span aria-hidden="true">+</span></button><p class="preview-note">Este rincón es compartido: las fotos y sus datos serán públicos para quienes lo visiten.</p></div></div></section>
 
     <section class="messages-section section-shell" id="para-chas" aria-labelledby="messages-title">
-      <div class="section-heading"><div><p class="eyebrow">03 / DIRECTO AL CORAZÓN</p><h2 id="messages-title">¿Me dejas<br><em>unas palabras?</em></h2></div><span class="handwritten message-note">Las palabras también<br>son un recuerdo. ♡</span></div>
+      <div class="section-heading"><div><p class="eyebrow">03 / DIRECTO AL CORAZÓN</p><h2 id="messages-title" data-i18n-html="heading.messages">¿Me dejas<br><em>unas palabras?</em></h2></div><span class="handwritten message-note">Las palabras también<br>son un recuerdo. ♡</span></div>
       <div class="message-modes" role="tablist" aria-label="Cómo dejarme un mensaje">
         <button id="note-tab" role="tab" type="button" aria-selected="true" aria-controls="wish-form">Escribir una notita</button>
         <button id="voice-tab" role="tab" type="button" aria-selected="false" aria-controls="voice-panel" tabindex="-1">Grabar un audio</button>
@@ -133,10 +139,39 @@
         <button id="voices-more" class="text-button" type="button" hidden>Escuchar más mensajes ↓</button>
       </div>
     </section>
+    <section class="party-section section-shell" id="fiesta" aria-labelledby="party-title">
+      <div class="section-heading"><div><p class="eyebrow">04 / EL PLAN TAMBIÉN ES JUGAR</p><h2 id="party-title" data-i18n-html="heading.party">Un ratito<br>de <em>fiesta.</em></h2></div><p>Si no sabes por dónde empezar,<br>deja que la suerte elija. ♡</p></div>
+      <div class="party-layout">
+        <article class="roulette-card" aria-labelledby="roulette-title">
+          <p class="eyebrow">UNA VUELTA, UN PLAN</p><h3 id="roulette-title">Ruleta de Chas</h3>
+          <div class="wheel-stage"><span class="wheel-pointer" aria-hidden="true">▼</span><div id="party-wheel" class="party-wheel" aria-hidden="true"></div><span class="wheel-center" aria-hidden="true">Chas ♡</span></div>
+          <button id="wheel-spin" class="button button-primary" type="button" disabled>Girar la ruleta ↻</button>
+          <div id="wheel-result" class="wheel-result" role="status" aria-live="polite" aria-atomic="true" hidden><p class="handwritten">La suerte dice…</p><p id="wheel-challenge"></p><p id="wheel-offline" class="form-note" hidden>Este se hace aquí, con quien tengas al lado. ♡</p></div>
+          <button id="wheel-action" class="text-button" type="button" hidden>Hacerlo ↗</button>
+        </article>
+        <div class="party-conversation">
+          <article class="party-question-card" id="party-question-card" aria-labelledby="party-game-title">
+            <div class="party-game-heading"><div><p class="eyebrow">CON CARIÑO, SIEMPRE</p><h3 id="party-game-title">Chisme o verdad</h3></div><figure class="serious-chas"><img src="assets/images/chas/chas-serious.jpeg" width="640" height="810" loading="lazy" alt="Chas mirando a cámara con expresión seria"><figcaption class="handwritten">te leo 👀</figcaption></figure></div>
+            <p id="party-prompt" class="party-prompt" aria-live="polite"></p>
+            <form id="party-answer-form" novalidate>
+              <label for="party-answer">Lo que te nazca</label><textarea id="party-answer" name="answer" rows="3" maxlength="1000" placeholder="Acá va tu versión…" aria-describedby="party-answer-help party-submit-status" required></textarea>
+              <div class="signature-row"><label for="party-name">Con cariño,<input id="party-name" name="name" maxlength="50" autocomplete="given-name" placeholder="Tu nombre" required aria-describedby="party-anonymity party-submit-status"></label><label class="checkbox-label"><input id="party-anonymous" name="is_anonymous" type="checkbox"> Anónimo</label></div>
+              <p id="party-anonymity" class="form-note">Si publicas sin nombre, tu nombre no se mostrará ni se guardará junto a esta respuesta.</p><p id="party-answer-help" class="form-note">Hasta 1000 caracteres. Las respuestas se comparten en este rincón.</p>
+              <div class="party-form-actions"><button id="party-submit" class="button button-dark" type="submit" disabled>Publicar mi respuesta ↗</button><button id="party-next-question" class="text-button" type="button" disabled>Otra pregunta ↝</button></div>
+              <p id="party-submit-status" class="message-status" role="status" aria-live="polite" aria-atomic="true"></p>
+            </form>
+          </article>
+          <article class="party-discovery" aria-labelledby="party-discovery-title"><p class="eyebrow">LO QUE VA CONTANDO MI GENTE</p><h3 id="party-discovery-title">A ver qué salió por aquí…</h3><div id="party-saved-answer" class="party-saved-answer" hidden aria-live="polite"><p id="party-saved-prompt"></p><p id="party-saved-content"></p><p id="party-saved-author" class="handwritten"></p></div><p id="party-read-status" class="message-status" role="status" aria-live="polite">Buscando respuestas…</p><div class="party-discovery-actions"><button id="party-another-answer" class="text-button" type="button" disabled>Ver otra respuesta ↝</button><button id="party-refresh" class="text-button" type="button">Actualizar ↻</button><button id="party-more" class="text-button" type="button" hidden>Buscar más respuestas ↓</button></div></article>
+        </div>
+      </div>
+    </section>
+
   </main>
   <footer class="site-footer section-shell"><a class="brand" href="#inicio">el álbum de <strong>Chas</strong><span class="brand-dot">.</span></a><p>Mis recuerdos favoritos siempre tienen buena compañía.</p><span class="footer-stitch" aria-hidden="true">╱╲╱╲╱╲</span><small class="site-credit">Hecho con ayuda de: Juanse, Miguel, Ale, Seba y Joel</small></footer>
   <div class="confetti-layer" id="confetti" aria-hidden="true"></div>
   <p class="sr-only" role="status" id="celebration-status"></p>
+
+  <dialog id="welcome-dialog" class="welcome-dialog" aria-labelledby="welcome-title" aria-describedby="welcome-copy"><p class="eyebrow">PASA, ESTÁS ENTRE MI GENTE</p><span class="welcome-spark" aria-hidden="true">✳</span><h2 id="welcome-title" data-i18n-html="heading.welcome">Bienvenido<br>al mundo de <em>Chas.</em></h2><p id="welcome-copy">Mis recuerdos, mis amigos y ganas de fiesta.<br>El poquito de chisme lo ponemos entre todos.</p><button id="welcome-enter" class="button button-primary" type="button" autofocus>Entrar ↗</button><p class="handwritten">Qué bueno tenerte por acá. ♡</p></dialog>
 
   <dialog id="photo-dialog" class="photo-dialog" aria-labelledby="detail-title">
     <div class="detail-layout">

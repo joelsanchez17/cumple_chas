@@ -22,13 +22,13 @@
     return client;
   }
 
-  async function request(buildQuery) {
+  async function request(buildQuery, { exactCount = false } = {}) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
-      const { data, error } = await buildQuery(getClient()).abortSignal(controller.signal);
+      const { data, error, count } = await buildQuery(getClient()).abortSignal(controller.signal);
       if (error) throw error;
-      return data;
+      return exactCount ? count : data;
     } finally {
       clearTimeout(timeout);
     }
@@ -115,6 +115,27 @@
     },
     create(payload) {
       return request((db) => db.from('audio_messages').insert(payload));
+    },
+  });
+  window.chasPartyAnswersApi = Object.freeze({
+    pageSize: PAGE_SIZE,
+    read(offset = 0) {
+      return request((db) => db.from('party_answers')
+        .select('id,prompt_id,answer,name,is_anonymous,created_at')
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1));
+    },
+    create(payload) {
+      return request((db) => db.from('party_answers').insert(payload));
+    },
+  });
+  window.chasCelebrationsApi = Object.freeze({
+    count() {
+      return request((db) => db.from('celebrations').select('id', { count: 'exact', head: true }), { exactCount: true });
+    },
+    create() {
+      return request((db) => db.from('celebrations').insert({ id: crypto.randomUUID() }));
     },
   });
 })();
