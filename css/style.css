@@ -2216,3 +2216,158 @@ button:disabled {
     align-items:flex-start;
   }
 }
+
+/* A voice note is another kind of letter, in the same scrapbook. */
+.message-modes {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:30px;
+}
+.message-modes button {
+  min-height:46px;
+  padding:10px 18px;
+  border:1px solid var(--line);
+  border-radius:30px;
+  background:transparent;
+  font-size:12px;
+}
+.message-modes button[aria-selected="true"] {
+  background:var(--ink);
+  color:var(--paper);
+}
+[hidden] {
+  display:none!important;
+}
+.voice-panel {
+  min-width:0;
+}
+.voice-panel h3 {
+  font-family:var(--serif);
+  font-size:27px;
+  line-height:1.25;
+  letter-spacing:-.6px;
+}
+.voice-intro {
+  font-size:12px;
+  color:var(--muted);
+  margin-top:12px;
+}
+.voice-recording-state {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:9px;
+  border-block:1px solid var(--line);
+  padding:17px 0;
+  margin-top:22px;
+  font-size:11px;
+}
+.voice-recording-dot {
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--teal);
+  flex-shrink:0;
+}
+.voice-recording-state[data-phase="recording"] .voice-recording-dot {
+  background:var(--berry);
+  animation:record-pulse 1.2s ease-in-out infinite;
+}
+.voice-timer {
+  font-variant-numeric:tabular-nums;
+  font-size:18px;
+  color:var(--ink);
+  margin-left:auto;
+}
+.voice-record-controls,.voice-review-actions,.voice-success-actions {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px 20px;
+  margin-top:18px;
+}
+.voice-record-controls .button {
+  min-width:130px;
+  width:auto;
+}
+.voice-review {
+  margin-top:23px;
+}
+.voice-review .handwritten {
+  color:var(--teal);
+  margin-bottom:14px;
+}
+.voice-panel audio,.voice-card audio {
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+.voice-review-actions {
+  justify-content:space-between;
+  margin-top:7px;
+}
+.voice-panel .signature-row {
+  margin-top:21px;
+}
+#voice-send {
+  margin-top:16px;
+}
+#voice-name[aria-invalid="true"] {
+  outline:2px solid var(--berry);
+  outline-offset:4px;
+}
+.voice-success {
+  text-align:center;
+  padding-block:8px;
+}
+.voice-success-mark {
+  display:grid;
+  place-items:center;
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:#e0e9df;
+  color:var(--teal);
+  font-size:28px;
+  margin:0 auto 16px;
+}
+.voice-success>p {
+  font-size:13px;
+  margin-top:15px;
+}
+.voice-success-actions {
+  justify-content:center;
+}
+.voice-success-actions .button {
+  width:auto;
+}
+.voice-card .message-signature {
+  margin-top:0;
+}
+.voice-card-detail {
+  font-size:10px;
+  color:var(--muted);
+  margin:8px 0 17px;
+}
+@keyframes record-pulse {
+  50% { opacity:.35; }
+}
+@media(max-width:760px) {
+  .message-modes {
+    gap:8px;
+    margin-top:25px;
+  }
+  .message-modes button {
+    flex:1;
+    padding-inline:12px;
+    font-size:11px;
+  }
+  .voice-panel h3 {
+    font-size:24px;
+  }
+  .voice-record-controls .button {
+    min-height:52px;
+  }
+}

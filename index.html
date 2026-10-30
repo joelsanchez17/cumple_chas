@@ -15,6 +15,9 @@
   <script src="js/guest-photos.js" defer></script>
   <script src="js/messages.js" defer></script>
   <script src="js/photo-comments.js" defer></script>
+  <script src="js/voice-recorder.js" defer></script>
+  <script src="js/voice-data.js" defer></script>
+  <script src="js/voice-messages.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#inicio">Saltar al contenido</a>
@@ -79,9 +82,13 @@
 
     <section class="messages-section section-shell" id="para-chas" aria-labelledby="messages-title">
       <div class="section-heading"><div><p class="eyebrow">03 / DIRECTO AL CORAZÓN</p><h2 id="messages-title">¿Me dejas<br><em>unas palabras?</em></h2></div><span class="handwritten message-note">Las palabras también<br>son un recuerdo. ♡</span></div>
+      <div class="message-modes" role="tablist" aria-label="Cómo dejarme un mensaje">
+        <button id="note-tab" role="tab" type="button" aria-selected="true" aria-controls="wish-form">Escribir una notita</button>
+        <button id="voice-tab" role="tab" type="button" aria-selected="false" aria-controls="voice-panel" tabindex="-1">Grabar un audio</button>
+      </div>
       <div class="letter-layout">
-        <div class="letter-intro"><span class="large-heart" aria-hidden="true">♡</span><h3>Me encantará<br>leerte por aquí.</h3><p>Un deseo, un “¿te acuerdas?” o lo que te nazca. Quiero tener un rincón para volver a leer a mi gente.</p><p class="form-note">Tu notita quedará en este álbum y podrán leerla quienes lo visiten. Puedes firmarla o elegir “Sin nombre”.</p></div>
-        <form id="wish-form" class="wish-form" novalidate>
+        <div class="letter-intro"><span class="large-heart" aria-hidden="true">♡</span><h3>Me encantará<br>leerte. Y escucharte.</h3><p>Un deseo, un “¿te acuerdas?” o lo que te nazca. Quiero tener un rincón para volver a leer y escuchar a mi gente.</p><p class="form-note">Tu mensaje quedará en este álbum y podrán leerlo o escucharlo quienes lo visiten. Puedes firmarlo o elegir “Sin nombre”.</p></div>
+        <form id="wish-form" class="wish-form" role="tabpanel" aria-labelledby="note-tab" novalidate>
           <div class="letter-top"><span>UNA NOTITA PARA CHAS</span><span aria-hidden="true">↗ ♡</span></div>
           <label for="wish-message">Chas, quería decirte…</label>
           <textarea id="wish-message" name="content" maxlength="1000" rows="4" placeholder="Que nunca te falten motivos para bailar…" aria-describedby="wish-help wish-status" required></textarea>
@@ -90,6 +97,27 @@
           <button id="wish-submit" class="button button-dark" type="submit" disabled>Enviar mi notita <span aria-hidden="true">↗</span></button>
           <p id="wish-status" class="message-status" role="status" aria-live="polite" aria-atomic="true"></p>
         </form>
+        <section id="voice-panel" class="wish-form voice-panel" role="tabpanel" aria-labelledby="voice-tab" hidden>
+          <div class="letter-top"><span>UN RATITO DE TU VOZ</span><span aria-hidden="true">♬ ♡</span></div>
+          <div id="voice-workspace">
+            <h3>Hay voces que son un abrazo.</h3>
+            <p class="voice-intro">Grábame algo de hasta dos minutos. Puedes escucharlo antes de enviarlo.</p>
+            <div id="voice-recording-state" class="voice-recording-state" data-phase="idle"><span class="voice-recording-dot" aria-hidden="true"></span><span id="voice-state-label">Cuando quieras, te escucho.</span><span id="voice-timer" class="voice-timer" role="timer" aria-label="Tiempo de grabación" aria-live="off">0:00 / 2:00</span></div>
+            <p id="voice-limit-warning" class="form-note" role="status" hidden>Quedan pocos segundos. Puedes ir cerrando tu mensaje. ♡</p>
+            <div class="voice-record-controls"><button id="voice-record" class="button button-primary" type="button" disabled>Grabar</button><button id="voice-stop" class="button button-dark" type="button" hidden>■ Detener</button><button id="voice-cancel" class="text-button" type="button" hidden>Cancelar</button></div>
+            <div id="voice-review" class="voice-review" hidden>
+              <p class="handwritten">Así suena tu recuerdo.</p><audio id="voice-preview" controls preload="metadata" aria-label="Escuchar mi grabación antes de enviarla"></audio>
+              <div class="voice-review-actions"><button id="voice-rerecord" class="text-button" type="button">Grabar de nuevo</button><button id="voice-discard" class="text-button" type="button">Descartar</button></div>
+              <form id="voice-form" novalidate>
+                <div class="signature-row"><label for="voice-name">Con cariño,<input id="voice-name" name="name" maxlength="50" placeholder="Tu nombre" autocomplete="given-name" aria-describedby="voice-help voice-status" required></label><label class="checkbox-label"><input id="voice-anonymous" name="is_anonymous" type="checkbox"> Sin nombre</label></div>
+                <p id="voice-help" class="form-note">Escribe tu nombre o marca “Sin nombre”. El audio solo se sube cuando pulses enviar.</p>
+                <button id="voice-send" class="button button-dark" type="submit" disabled>Enviar mi audio ↗</button>
+              </form>
+            </div>
+          </div>
+          <div id="voice-success" class="voice-success" role="status" tabindex="-1" hidden><span class="voice-success-mark" aria-hidden="true">✓</span><h3>Audio guardado</h3><p>Tu mensaje ya quedó entre mis recuerdos. Gracias por dejarme tu voz. ♡</p><div class="voice-success-actions"><button id="voice-listen" class="button button-dark" type="button">Escuchar mensajes ↓</button><button id="voice-another" class="text-button" type="button">Grabar otro</button></div></div>
+          <p id="voice-status" class="message-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        </section>
       </div>
       <div class="published-messages" aria-labelledby="published-title">
         <div class="messages-heading"><h3 id="published-title">Las notitas de mi gente</h3><button id="messages-refresh" class="text-button" type="button">Actualizar <span aria-hidden="true">↻</span></button></div>
@@ -97,6 +125,12 @@
         <div id="messages-list" class="messages-grid" aria-busy="true"></div>
         <button id="messages-more" class="text-button" type="button" hidden>Ver más notitas <span aria-hidden="true">↓</span></button>
         <noscript><p>Activa JavaScript para leer y enviar las notitas.</p></noscript>
+      </div>
+      <div id="saved-voices" class="published-messages" aria-labelledby="voices-title">
+        <div class="messages-heading"><h3 id="voices-title" tabindex="-1">Las voces de mi gente</h3><button id="voices-refresh" class="text-button" type="button">Actualizar ↻</button></div>
+        <p id="voices-status" class="message-status" role="status" aria-live="polite" aria-atomic="true">Buscando los mensajes de voz…</p>
+        <div id="voices-list" class="messages-grid" aria-busy="true"></div>
+        <button id="voices-more" class="text-button" type="button" hidden>Escuchar más mensajes ↓</button>
       </div>
     </section>
   </main>

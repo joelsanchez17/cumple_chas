@@ -60,6 +60,7 @@ No dependency installation is needed:
 ```sh
 node tests/messages.test.cjs
 node tests/photo-comments.test.cjs
+node tests/voice-messages.test.cjs
 node tests/guest-photos.test.cjs
 node --check js/app.js
 node --check js/photos.js
@@ -68,6 +69,9 @@ node --check js/guest-photos.js
 node --check js/photo-comments.js
 node --check js/messages.js
 node --check js/supabase-client.js
+node --check js/voice-recorder.js
+node --check js/voice-data.js
+node --check js/voice-messages.js
 git diff --check
 ```
 
@@ -96,4 +100,43 @@ To test locally:
 
 Manual submissions are real public comments. Automated tests use mocks and do not write to Supabase. Comment tests cover permanent IDs, modal navigation, scoped reads, named/anonymous validation, safe rendering, successful and failed inserts, per-photo drafts, read retries, stale responses and navigating during a pending submission. Existing message tests remain unchanged.
 
-Audio and other contribution types are not implemented. No Netlify configuration is included.
+Voice messages are available in **Para Chas** (see below). No Netlify configuration is included.
+
+
+## Voice messages
+
+**Para Chas** now offers **Escribir una notita** and **Grabar un audio**. Voice recording requires a browser with `MediaRecorder`, microphone access and a secure context: HTTPS, or localhost on the same device. A phone visiting a computer's plain HTTP LAN IP generally cannot use the microphone; use HTTPS to test from a phone. Text messages remain available when recording is unsupported or permission is denied.
+
+### Code and lifecycle
+
+- `js/voice-recorder.js` owns microphone access, MIME detection and the MediaRecorder lifecycle. It tries the first format reported by `MediaRecorder.isTypeSupported()` from WebM/Opus, WebM, MP4, Ogg/Opus, Ogg, MPEG. If none is advertised, it lets the browser select its default, then verifies the actual recording MIME type. MP4 uses `.m4a`, WebM `.webm`, Ogg `.ogg`, and MPEG `.mp3`. Codec parameters are removed from the Blob's content type to match the bucket's allowed base MIME types; the audio is not transcoded.
+- Recording has a visible timer, a warning after 105 seconds and automatic stopping at the two-minute ceiling (scheduled with a 100 ms safety margin). Elapsed time is independently checked: recordings longer than 120 seconds, including delayed/background timer cases, are rejected rather than mislabeled. Valid durations are stored as integer seconds rounded up. Recordings shorter than one second are rejected.
+- Stopping releases every microphone track and makes a local Blob URL available for listening, pausing, discarding or re-recording. It never uploads. Switching to text or hiding the page stops an active recording. Discarding, re-recording, successful submission and leaving the page revoke local URLs; pending permission requests are cancelled logically and late microphone streams are released.
+- `js/voice-data.js` validates the signature, MIME, 1–120 second duration and 10 MB size limit, generates `uploads/<crypto.randomUUID()>.<extension>`, and orchestrates publishing. A nonanonymous message needs a trimmed name of up to 50 characters. Anonymous messages always send `name: null` and `is_anonymous: true`.
+- The `chasVoiceMessagesApi` in `js/supabase-client.js` reuses the existing publishable client. First it uploads to the public **voice-messages** bucket with `upsert: false`. Only after Storage confirms success does it insert `storage_path`, `name`, `is_anonymous`, `duration_seconds` into `public.audio_messages`. No authentication, update or delete operations are added.
+- `js/voice-messages.js` manages the tabs, recording controls, preview, explicit-send form and clear **✓ Audio guardado** success panel. Saved recordings are fetched newest first in pages of 50. Cards display safe author text (or **Anónimo**), duration, date and a native audio player with no autoplay and no eager audio download. URLs are derived from the bucket and `storage_path`; IDs and paths are not printed in the UI.
+
+### Failures and possible orphan files
+
+A Storage failure prevents metadata insertion, preserves the local preview and allows retrying the **same** unique path without overwrite. If that retry reports an existing object, sending is blocked because the earlier response may have been lost. Technical details and the path are logged for review.
+
+If Storage succeeds but metadata registration fails (including an uncertain network response), the file can become an **orphan object**. The client does not delete it or automatically send it again. It logs `storage_path` for administrative review/cleanup, keeps the preview playable and disables resending that draft. Check the saved-message list before recording another. A lost response may mean the row was actually created. Manual administrative review must determine whether cleanup is appropriate; no admin UI or DELETE permission is implemented.
+
+If an insert is confirmed but the subsequent list refresh fails, the success panel remains visible and the list offers **Actualizar**. No second upload is needed.
+
+### Exact manual test procedure
+
+1. From this directory run `python3 -m http.server 8000`, then open **http://localhost:8000/#para-chas** on the same computer. Use an HTTPS-served copy for iOS Safari / Android Chrome testing; do not configure Netlify for this step.
+2. Verify the existing text-message form still reads and sends normally. Select **Grabar un audio**. Press **Grabar** and allow microphone access. Verify the recording indicator, timer and obvious **Detener** button. Stop after several seconds. The microphone indicator should turn off.
+3. Play, pause and listen to the local preview. In developer tools, verify no Storage upload occurred just by recording or stopping. Use **Descartar** and **Grabar de nuevo** to test a fresh take.
+4. Record again, leave the name empty and press **Enviar mi audio**. Verify name validation and that no upload starts. Enter a name, then explicitly send. Watch **Subiendo tu audio…**, the registration stage and **✓ Audio guardado**. Use **Escuchar mensajes**; the new card should show your name and an audio player. Reload to verify persistence.
+5. Use **Grabar otro**, record and select **Sin nombre**. Send and check **Anónimo**. Inspect the requests: the POST to `audio_messages` follows Storage success and includes a null name, true anonymity, an integer duration and a unique Storage path. Manual sends create real public recordings.
+6. Record for the full two minutes: check the warning near the end, automatic stop, local playback and duration no greater than 2:00. Switch to text or put the browser in the background mid-recording; capture must stop, without uploading automatically.
+7. Deny microphone permission, then restore it through browser settings and retry. Also test a missing/busy microphone and an unsupported/insecure browser context. A friendly message should appear and text messages must remain usable.
+8. Record a take, then switch the network offline before sending. The preview and signature must remain after the upload error. Restore connectivity and retry. A retry reuses the original path; it never overwrites or creates a second object automatically.
+9. To test metadata failure deliberately, use browser request blocking for `/rest/v1/audio_messages` while leaving Storage reachable, then send a test take. This can create a real orphan file: the UI must show a friendly failure, preserve playback, block resending and log the path. Do not change RLS or add delete permission. Review the logged path administratively afterward. Automated tests cover this case without creating real objects.
+10. Block only the audio SELECT request (or go offline and click **Actualizar**) to check friendly list-load failure and recovery. Test saved playback in both iOS Safari and Android Chrome; format support is browser-dependent and there is no transcoding.
+
+Run `node tests/voice-messages.test.cjs` for mocked recorder, MIME, permissions, size/duration, author payload, path, upload/metadata failure, playback rendering, UI lifecycle and adapter tests. Automated tests never create live recordings or Storage objects. Browser/microphone behavior still needs the real-device checks above.
+
+Deferred: Netlify, QR codes, authentication, moderation/admin tools, audio editing/deletion and likes.

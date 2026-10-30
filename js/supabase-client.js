@@ -91,4 +91,30 @@
         .single());
     },
   });
+  const AUDIO_BUCKET = 'voice-messages';
+  window.chasVoiceMessagesApi = Object.freeze({
+    pageSize: PAGE_SIZE,
+    read(offset = 0) {
+      return request((db) => db.from('audio_messages')
+        .select('storage_path,name,is_anonymous,duration_seconds,created_at')
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1));
+    },
+    publicUrl(storagePath) {
+      return getClient().storage.from(AUDIO_BUCKET).getPublicUrl(storagePath).data.publicUrl;
+    },
+    async upload(storagePath, blob) {
+      const { data, error } = await getClient().storage.from(AUDIO_BUCKET).upload(storagePath, blob, {
+        contentType: blob.type,
+        cacheControl: '3600',
+        upsert: false,
+      });
+      if (error) throw error;
+      return data;
+    },
+    create(payload) {
+      return request((db) => db.from('audio_messages').insert(payload));
+    },
+  });
 })();
