@@ -223,7 +223,7 @@ The site can be installed from a supported browser on **HTTPS**, or tested on lo
 
 ### Cache and update policy
 
-`sw.js` uses versioned **`chas-album-shell-v3`** and **`chas-album-images-v3`** caches. Install precaches the HTML, CSS, every local JS file, manifest, launcher icons/favicon, hero portrait and small serious portrait. Successful activation claims clients and deletes only obsolete `chas-album-*` caches, preserving unrelated caches on the origin.
+`sw.js` uses versioned **`chas-album-shell-v4`** and **`chas-album-images-v4`** caches. Install precaches the HTML, CSS, every local JS file, manifest, launcher icons/favicon, hero portrait and small serious portrait. Successful activation claims clients and deletes only obsolete `chas-album-*` caches, preserving unrelated caches on the origin.
 
 Subsequent allowlisted static requests are **network first** with HTTP revalidation (`cache: 'no-cache'`); a network failure or static-host 5xx can fall back to the saved response. Full/unavailable cache storage does not prevent a successful network response. Curated JPEGs under `/assets/images/chas/` are cached only as requested, bounded to **21 entries** (the current local image collection is about 6 MB). This is not a download of the whole gallery at install time. Photos never opened/cached may be unavailable offline.
 
@@ -233,21 +233,21 @@ For **each release changing the shell or its cache list, bump `VERSION` in `sw.j
 
 ### Installation behavior
 
-Android/Chromium: **Instalar el álbum** appears near the footer only after the browser emits `beforeinstallprompt`, the page has loaded and the welcome dialog is closed. The native prompt is opened only on an explicit click. Acceptance, `appinstalled` or standalone mode hides the action. Declining/dismissing suppresses it for the session.
+Android: **Instalar en Android** appears beneath the hero after the welcome closes. An explicit click opens the native install prompt when `beforeinstallprompt` is available. Until then it explains Chrome's **⋮ → Install app / Add to Home screen** menu; it never claims that an installation took place. On desktop, the install action still appears only when the browser offers a native prompt. Acceptance, `appinstalled` and standalone mode hide the panel. Declining/dismissing suppresses it for the session.
 
-iPhone/iPad: Safari outside standalone mode gets a small footer hint, **Compartir → Añadir a pantalla de inicio**, after the welcome closes. Desktop-mode iPad Safari is recognized through touch capability. In-app browsers and alternative iOS browser UAs are excluded from this Safari-specific hint. **Ahora no** stores `chas:pwa-install-dismissed:v1` in sessionStorage; restricted storage still permits in-memory dismissal. The site cannot inspect whether an iOS app is installed separately while Safari remains open; instructions are always suppressed when actually running standalone (`navigator.standalone` or display-mode media query).
+iPhone/iPad: Safari outside standalone mode gets a dismissible **Compartir → Añadir a pantalla de inicio** hint below the hero. Other detected iOS browsers/in-app browsers show an instruction to open the album in Safari first. Desktop-mode iPad is recognized through touch capability. **Ahora no** stores `chas:pwa-install-dismissed:v1` in sessionStorage; restricted storage still permits in-memory dismissal. The site cannot inspect whether an iOS app is installed separately while Safari remains open; guidance is always suppressed when running standalone. The website cannot trigger Safari's Add to Home Screen confirmation automatically.
 
 ### Exact manual checks after deployment
 
 **Android / Chrome**
 
-1. Open the deployed **HTTPS root URL** in Chrome, with internet access. Complete the birthday welcome. Browse the album, then look near the footer for **Instalar el álbum** once Chrome considers installation available. Browser eligibility/timing varies; the Chrome menu's **Install app / Add to Home screen** is also available when supported. No install button should be manufactured without an available browser event.
+1. Open the deployed **HTTPS root URL** in Chrome, with internet access. Complete the birthday welcome. Look beneath the hero for **Instalar en Android**. Tap it: it opens the native installation when available or explains the Chrome menu. Browser eligibility/timing varies; the Chrome menu's **Install app / Add to Home screen** is also available when supported. A missing native event must show guidance rather than pretend to install.
 2. Tap the install action, accept Chrome's prompt, then launch **Chas** from the home screen. Verify the correct photo icon and standalone window without normal browser navigation chrome. The install CTA must be absent. Test a named/anonymous message, photo comment, guest photo, voice message and celebration intentionally if real production writes are desired.
 3. Open the site in an ordinary browser tab again. Test declining the install prompt when offered; there should be no repeated prompt in that session. Existing birthday welcome/session behavior must remain independent.
 
 **iPhone / iPad / Safari**
 
-1. Open the deployed HTTPS URL in **Safari**. Finish the welcome, find the subtle footer guidance and switch languages to check that it translates. **Ahora no** should hide it during the current Safari session.
+1. Open the deployed HTTPS URL in **Safari**. Finish the welcome, find the subtle guidance beneath the hero and switch languages to check that it translates. **Ahora no** should hide it during the current Safari session.
 2. Use Safari's **Share → Add to Home Screen**, confirm **Chas** and add it. If iOS offers an **Open as Web App** option, leave it enabled. Launch the home-screen icon and verify the standalone appearance, correct icon and absence of install guidance.
 3. Test portrait/landscape, the bottom navigation, dialogs, microphone permission, recording and saved playback. Repeat on an iPad in desktop browsing mode. Native installation and permissions need a real device; a desktop UA simulation is not a substitute.
 
@@ -281,3 +281,7 @@ An original 94×47 inline SVG mountain/terrace sketch labeled **Machu Picchu** s
 The service-worker cache version moves from **v2 to v3** because cached HTML/CSS/translations changed. No new cache URLs are required for inline SVGs, and the caching strategy is unchanged. All four photo PWA icons are byte-for-byte unchanged (SHA-256 verified), as are the manifest and Supabase/install logic.
 
 Validation: **105/105 automated tests**, JavaScript syntax and `git diff --check` passed. Chromium checked all five languages at 320, 375, 393, 768 and 1280 px: zero page overflow, matching translated details, zero uncaught exceptions, a valid manifest and an active v3 shell cache. The five mobile about-section axe checks reported zero violations. Browser Supabase calls were mocked; no real mutations were made.
+
+Install-action refinement: the Android action and iOS guidance now sit beneath the hero, respect welcome/dismissal/standalone state, and work in all five interface languages. Cache version is **v4**; caching strategy, photo icons and Supabase are unchanged. Two additional state tests cover Android menu fallback/native transition and iOS browser guidance.
+
+Verification of the install-action refinement: **107/107 tests passed**. Chromium covered Android, Safari iPhone and an iPhone in-app UA across five languages at 320/393 px (30 combinations), checking native-prompt fallback/acceptance, welcome gating, dismissal, translations and no layout overflow or uncaught exceptions. All Supabase writes were blocked.

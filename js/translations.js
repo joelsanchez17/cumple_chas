@@ -2923,5 +2923,26 @@ window.chasTranslations = Object.freeze({
     "de": "Machu Picchu",
     "pt": "Machu Picchu",
     "zh-CN": "Machu Picchu"
+  },
+  "pwa.android.button": {
+    "es": "Instalar en Android",
+    "en": "Install on Android",
+    "de": "Auf Android installieren",
+    "pt": "Instalar no Android",
+    "zh-CN": "在 Android 上安装"
+  },
+  "pwa.android.help": {
+    "es": "En Chrome, abre el menú ⋮ y elige Instalar aplicación o Añadir a pantalla de inicio.",
+    "en": "In Chrome, open the ⋮ menu and choose Install app or Add to Home screen.",
+    "de": "Öffne in Chrome das Menü ⋮ und wähle App installieren oder Zum Startbildschirm hinzufügen.",
+    "pt": "No Chrome, abra o menu ⋮ e escolha Instalar aplicativo ou Adicionar à tela inicial.",
+    "zh-CN": "在 Chrome 中打开 ⋮ 菜单，选择“安装应用”或“添加到主屏幕”。"
+  },
+  "pwa.ios.safari": {
+    "es": "Abre este álbum en Safari y toca Compartir → Añadir a pantalla de inicio.",
+    "en": "Open this album in Safari and tap Share → Add to Home Screen.",
+    "de": "Öffne dieses Album in Safari und tippe auf Teilen → Zum Home-Bildschirm.",
+    "pt": "Abra este álbum no Safari e toque em Compartilhar → Adicionar à Tela de Início.",
+    "zh-CN": "用 Safari 打开相册，然后轻点“分享”→“添加到主屏幕”。"
   }
 });

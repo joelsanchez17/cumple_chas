@@ -43,9 +43,9 @@ function worker() {
     offline(value = true) { failNetwork = value; }, cacheFailure() { failCache = true; }, response(value, code = 200) { body = value; status = code; },
     get skips() { return skips; }, get claims() { return claims; } };
 }
-function ui({ agent = 'Chrome Android', touch = 0, standalone = false, appleStandalone = false, welcome = false, storageDenied = false, dismissed = false, secure = true, registrationFailure = false } = {}) {
+function ui({ agent = 'Chrome Desktop', touch = 0, standalone = false, appleStandalone = false, welcome = false, storageDenied = false, dismissed = false, secure = true, registrationFailure = false } = {}) {
   function target() { return { handlers: {}, addEventListener(type, fn) { (this.handlers[type] ||= []).push(fn); }, async fire(type, values = {}) { await Promise.all((this.handlers[type] || []).map(fn => fn({ preventDefault() {}, ...values }))); } }; }
-  const ids = ['pwa-install', 'pwa-install-button', 'pwa-ios-help', 'pwa-install-status', 'welcome-dialog', 'connection-note', 'pwa-install-dismiss'];
+  const ids = ['pwa-install', 'pwa-install-button', 'pwa-android-help', 'pwa-ios-help', 'pwa-install-status', 'welcome-dialog', 'connection-note', 'pwa-install-dismiss'];
   const elements = Object.fromEntries(ids.map(id => [id, { ...target(), hidden: true, disabled: false, textContent: '', open: false }]));
   elements['welcome-dialog'].open = welcome;
   const storage = new Map(dismissed ? [['chas:pwa-install-dismissed:v1', 'yes']] : []);
@@ -152,7 +152,7 @@ test('iPhone Safari and desktop-mode iPad receive dismissible instructions', asy
     const f = ui({ agent, touch }); await f.window.fire('load'); assert.equal(f.elements['pwa-install'].hidden, false); assert.equal(f.elements['pwa-ios-help'].hidden, false); assert.equal(f.elements['pwa-install-button'].hidden, true);
     await f.elements['pwa-install-dismiss'].fire('click'); assert.equal(f.elements['pwa-install'].hidden, true);
   }
-  for (const agent of ['Macintosh Version/18 Safari/605.1', 'iPhone CriOS/130 Mobile Safari/604.1', 'iPhone Instagram Safari/604.1']) { const f = ui({ agent }); await f.window.fire('load'); assert.equal(f.elements['pwa-install'].hidden, true); }
+  for (const agent of ['Macintosh Version/18 Safari/605.1']) { const f = ui({ agent }); await f.window.fire('load'); assert.equal(f.elements['pwa-install'].hidden, true); }
 });
 
 test('saved dismissal and restricted storage do not annoy or block visitors', async () => {
@@ -166,5 +166,25 @@ test('offline notice follows connection state without any offline submission que
 
 test('all PWA keys have complete translations in five languages', () => {
   const context = vm.createContext({ window: {} }); vm.runInContext(source('js/translations.js'), context);
-  for (const key of ['pwa.offline', 'pwa.label', 'pwa.install', 'pwa.ios', 'pwa.dismiss', 'pwa.error']) for (const locale of ['es', 'en', 'de', 'pt', 'zh-CN']) assert.ok(context.window.chasTranslations[key][locale]);
+  for (const key of ['pwa.offline', 'pwa.label', 'pwa.install', 'pwa.ios', 'pwa.dismiss', 'pwa.error', 'pwa.android.button', 'pwa.android.help', 'pwa.ios.safari']) for (const locale of ['es', 'en', 'de', 'pt', 'zh-CN']) assert.ok(context.window.chasTranslations[key][locale]);
+});
+
+
+test('Android always offers an install action and explains the browser menu until native install is available', async () => {
+  const f = ui({ agent: 'Chrome Android' }); await f.window.fire('load');
+  assert.equal(f.elements['pwa-install-button'].hidden, false);
+  assert.equal(f.elements['pwa-install-button'].textContent, 'Instalar en Android');
+  await f.elements['pwa-install-button'].fire('click'); assert.equal(f.elements['pwa-android-help'].hidden, false);
+  let prompted = false;
+  await f.window.fire('beforeinstallprompt', { prompt() { prompted = true; }, userChoice: Promise.resolve({ outcome: 'accepted' }) });
+  assert.equal(f.elements['pwa-android-help'].hidden, true);
+  await f.elements['pwa-install-button'].fire('click'); assert.equal(prompted, true); assert.equal(f.elements['pwa-install'].hidden, true);
+});
+
+test('iPhone alternative browsers show Safari instructions without claiming automatic installation', async () => {
+  for (const agent of ['iPhone CriOS/130 Mobile Safari/604.1', 'iPhone Instagram Safari/604.1']) {
+    const f = ui({ agent }); await f.window.fire('load');
+    assert.equal(f.elements['pwa-install'].hidden, false); assert.match(f.elements['pwa-ios-help'].textContent, /Safari/);
+    assert.equal(f.elements['pwa-install-button'].hidden, true);
+  }
 });

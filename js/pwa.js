@@ -4,14 +4,18 @@
   const dismissalKey = 'chas:pwa-install-dismissed:v1';
   const panel = document.getElementById('pwa-install');
   const button = document.getElementById('pwa-install-button');
+  const androidHelp = document.getElementById('pwa-android-help');
   const iosHelp = document.getElementById('pwa-ios-help');
   const feedback = document.getElementById('pwa-install-status');
   const welcome = document.getElementById('welcome-dialog');
   const offlineNote = document.getElementById('connection-note');
   const displayMode = window.matchMedia('(display-mode: standalone)');
   const agent = navigator.userAgent || '';
+  const android = /Android/i.test(agent);
   const ios = /iPad|iPhone|iPod/.test(agent) || (/Macintosh/.test(agent) && navigator.maxTouchPoints > 1);
   const iosSafari = ios && /Safari/.test(agent) && !/CriOS|FxiOS|EdgiOS|OPiOS|GSA|FBAN|FBAV|Instagram/.test(agent);
+  if (ios && !iosSafari) iosHelp.textContent = 'Abre este álbum en Safari y toca Compartir → Añadir a pantalla de inicio.';
+  let androidHelpRequested = false;
   let ready = false;
   let installed = false;
   let pendingPrompt = null;
@@ -22,11 +26,13 @@
 
   function standalone() { return installed || displayMode.matches || navigator.standalone === true; }
   function render() {
-    const visible = ready && !welcome.open && !standalone() && !dismissed && Boolean(pendingPrompt || iosSafari || feedback.textContent);
+    const visible = ready && !welcome.open && !standalone() && !dismissed && Boolean(pendingPrompt || android || ios || feedback.textContent);
     panel.hidden = !visible;
-    button.hidden = !pendingPrompt;
+    button.hidden = !(pendingPrompt || android);
+    button.textContent = android ? 'Instalar en Android' : 'Instalar el álbum';
+    androidHelp.hidden = !androidHelpRequested;
     button.disabled = prompting;
-    iosHelp.hidden = !iosSafari;
+    iosHelp.hidden = !ios;
   }
   function dismiss() {
     dismissed = true;
@@ -44,6 +50,7 @@
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     pendingPrompt = event;
+    androidHelpRequested = false;
     feedback.textContent = '';
     render();
   });
@@ -54,7 +61,12 @@
   });
   document.getElementById('pwa-install-dismiss').addEventListener('click', dismiss);
   button.addEventListener('click', async () => {
-    if (!pendingPrompt || prompting || standalone()) return;
+    if (prompting || standalone()) return;
+    if (!pendingPrompt) {
+      androidHelpRequested = android;
+      render();
+      return;
+    }
     const prompt = pendingPrompt;
     prompting = true;
     render();
