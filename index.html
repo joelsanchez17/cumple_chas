@@ -6,10 +6,14 @@
   <meta name="theme-color" content="#fff7ec">
   <meta name="description" content="Soy Chas. Mis viajes, mi gente y las historias que quiero guardar. Un álbum que empezó con un cumpleaños.">
   <title>Chas · Mi álbum de recuerdos</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon-photo.png">
+  <meta name="apple-mobile-web-app-title" content="Chas">
   <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <script src="js/translations.js" defer></script>
   <script src="js/i18n.js" defer></script>
+  <script src="js/pwa.js" defer></script>
   <script src="js/photos.js" defer></script>
   <script src="js/photo-upload.js" defer></script>
   <script src="js/app.js" defer></script>
@@ -37,6 +41,8 @@
     </nav>
     <div class="header-extras"><a class="header-note" href="#fiesta">¿un ratito de fiesta? ↗</a><label class="language-picker"><span class="sr-only" data-i18n="language.label">Idioma de la página</span><select id="language-select" aria-label="Idioma de la página" translate="no"><option value="es">ES · Español</option><option value="en">EN · English</option><option value="de">DE · Deutsch</option><option value="pt">PT · Português</option><option value="zh-CN">中文</option></select></label></div>
   </header>
+
+  <p id="connection-note" class="connection-note section-shell" role="status" hidden>Sin conexión. Puedes ver lo que ya abriste; para compartir y leer novedades necesitas internet.</p>
 
   <main>
     <section class="hero section-shell" id="inicio" aria-labelledby="hero-title">
@@ -169,6 +175,12 @@
 
   </main>
   <footer class="site-footer section-shell"><a class="brand" href="#inicio">el álbum de <strong>Chas</strong><span class="brand-dot">.</span></a><p>Mis recuerdos favoritos siempre tienen buena compañía.</p><span class="footer-stitch" aria-hidden="true">╱╲╱╲╱╲</span><small class="site-credit">Hecho con ayuda de: Juanse, Miguel, Ale, Seba y Joel</small></footer>
+  <aside id="pwa-install" class="pwa-install section-shell" aria-label="Llévate el álbum" hidden>
+    <button id="pwa-install-button" class="text-button" type="button" hidden>Instalar el álbum</button>
+    <p id="pwa-ios-help" hidden>Para llevarme contigo: Compartir → Añadir a pantalla de inicio.</p>
+    <p id="pwa-install-status" role="status"></p>
+    <button id="pwa-install-dismiss" class="text-button" type="button">Ahora no</button>
+  </aside>
   <div class="confetti-layer" id="confetti" aria-hidden="true"></div>
   <p class="sr-only" role="status" id="celebration-status"></p>
 

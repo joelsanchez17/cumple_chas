@@ -2867,5 +2867,47 @@ window.chasTranslations = Object.freeze({
     "de": "Willkommen<br>in <em>Chas’ Welt.</em>",
     "pt": "Bem-vindo<br>ao mundo da <em>Chas.</em>",
     "zh-CN": "欢迎来到<br><em>Chas 的世界。</em>"
+  },
+  "pwa.offline": {
+    "es": "Sin conexión. Puedes ver lo que ya abriste; para compartir y leer novedades necesitas internet.",
+    "en": "You’re offline. You can revisit what you’ve opened; sharing and new updates need internet.",
+    "de": "Du bist offline. Bereits geöffnete Seiten kannst du ansehen; zum Teilen und für Neues brauchst du Internet.",
+    "pt": "Você está sem conexão. Pode rever o que já abriu; para compartilhar e ver novidades, precisa de internet.",
+    "zh-CN": "当前离线。可以看看已经打开过的内容；分享和查看新内容需要联网。"
+  },
+  "pwa.label": {
+    "es": "Llévate el álbum",
+    "en": "Take the album with you",
+    "de": "Nimm das Album mit",
+    "pt": "Leve o álbum com você",
+    "zh-CN": "把相册带在身边"
+  },
+  "pwa.install": {
+    "es": "Instalar el álbum",
+    "en": "Install the album",
+    "de": "Album installieren",
+    "pt": "Instalar o álbum",
+    "zh-CN": "安装相册"
+  },
+  "pwa.ios": {
+    "es": "Para llevarme contigo: Compartir → Añadir a pantalla de inicio.",
+    "en": "Take me with you: Share → Add to Home Screen.",
+    "de": "Nimm mich mit: Teilen → Zum Home-Bildschirm.",
+    "pt": "Me leve com você: Compartilhar → Adicionar à Tela de Início.",
+    "zh-CN": "把我带在身边：分享 → 添加到主屏幕。"
+  },
+  "pwa.dismiss": {
+    "es": "Ahora no",
+    "en": "Not now",
+    "de": "Jetzt nicht",
+    "pt": "Agora não",
+    "zh-CN": "暂时不用"
+  },
+  "pwa.error": {
+    "es": "No pudimos abrir la instalación. Prueba desde el menú de tu navegador.",
+    "en": "Couldn’t open the installer. Try your browser’s menu.",
+    "de": "Die Installation ließ sich nicht öffnen. Versuch es über das Menü deines Browsers.",
+    "pt": "Não foi possível abrir a instalação. Tente pelo menu do navegador.",
+    "zh-CN": "暂时无法打开安装窗口，请试试浏览器菜单。"
   }
 });

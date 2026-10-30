@@ -209,3 +209,64 @@ Validation completed:
 Remaining verification before/after hosting: real iOS Safari and Android Chrome microphone permissions, speaker playback and device layouts; HTTPS on the deployment origin; one intentional end-to-end production submission for each integration if desired. Live INSERT/RLS and Storage write permissions were not exercised by this audit. There were no saved guest images/audio to verify against Storage after the cleanup. Public submissions still rely on the existing RLS/validation and client cooldown; authentication, moderation and server-side rate limiting remain outside this frontend scope. The celebration total refreshes on load/after celebrating, without realtime subscriptions. Existing upload-orphan recovery limitations are documented above.
 
 The browser audit tools were installed only in `/tmp`; the site remains dependency-free vanilla HTML/CSS/JavaScript. Browser evidence supplements the repository tests and does not replace real-device checks.
+
+## Installable album (PWA)
+
+The site can be installed from a supported browser on **HTTPS**, or tested on localhost. Deploy at the origin root: the manifest, start URL, scope and worker registration use `/`. No Netlify configuration is included. Installation does not change Supabase, RLS, schemas or Storage policies.
+
+### Files and app identity
+
+- `manifest.webmanifest`: permanent app ID `/`, **El álbum de Chas**, short name **Chas**, Spanish description/default language, `start_url: "/"`, `scope: "/"`, `display: "standalone"`, paper theme/background `#fff7ec`.
+- The photo app icons use the existing hero portrait `assets/images/chas/WhatsApp Image 2026-10-29 at 15.02.07 (2).jpeg` (1536×2048): Chas smiling outdoors in a white shirt and dark jacket. Normal icons crop source coordinates **x=300, y=320, side=1040 px**, keeping her face, hair and upper shoulders. The maskable variant uses a wider **x=110, y=110, side=1360 px** square so her facial features stay within the central safe circle under Android masks. All crops preserve the original proportions and expression without text, overlays or generated content. Exports: `chas-photo-192.png`, `chas-photo-512.png`, `chas-photo-maskable-512.png` and `apple-touch-icon-photo.png` (180×180). The PNGs use lossless RGB compression (about 57–366 KiB each), retaining natural skin tones without palette dithering. The original photograph and existing browser favicon are unchanged; obsolete star-based launcher assets were removed.
+- `index.html` links the manifest and Apple icon and sets the Apple app title. The existing viewport/theme metadata remains. Modern iOS uses the manifest's standalone display; obsolete app-capable tags and device-specific splash screens were not added.
+- `js/pwa.js` contains registration, optional installation guidance, standalone detection and the offline notice. `js/translations.js` adds six stable `pwa.*` keys, complete in ES/EN/DE/PT/zh-CN. `css/style.css` adds only small styles for these optional controls/notices.
+
+### Cache and update policy
+
+`sw.js` uses versioned **`chas-album-shell-v2`** and **`chas-album-images-v2`** caches. Install precaches the HTML, CSS, every local JS file, manifest, launcher icons/favicon, hero portrait and small serious portrait. Successful activation claims clients and deletes only obsolete `chas-album-*` caches, preserving unrelated caches on the origin.
+
+Subsequent allowlisted static requests are **network first** with HTTP revalidation (`cache: 'no-cache'`); a network failure or static-host 5xx can fall back to the saved response. Full/unavailable cache storage does not prevent a successful network response. Curated JPEGs under `/assets/images/chas/` are cached only as requested, bounded to **21 entries** (the current local image collection is about 6 MB). This is not a download of the whole gallery at install time. Photos never opened/cached may be unavailable offline.
+
+**Not cached or intercepted:** Supabase requests of any kind, live records/counts, guest photos, saved voice files, CDN scripts/fonts, unknown same-origin endpoints and every non-GET request. There is no offline write queue, background sync, upload retry queue or automatic replay. An offline visitor can open a previously cached shell and see its local content; shared-data reads and submissions fail honestly through the existing UI. A translated notice follows the browser's connection indicator. A connection indicator is only a hint; existing per-feature errors also handle a reachable network with an unavailable backend. The externally hosted Supabase SDK is not precached; reconnect/reload if it could not load offline. Fonts fall back to the existing local/system stack.
+
+For **each release changing the shell or its cache list, bump `VERSION` in `sw.js`**. Registration uses `updateViaCache: 'none'`. A new worker installs in the background and waits; it does not reload an open page or interrupt a recording/upload/draft. On the next normal page load, `js/pwa.js` asks an already waiting worker to activate. Activation removes obsolete app caches. No controller-change reload is used. Static network-first requests also prevent indefinite stale shell responses while online. If the update finishes installing after that load, it activates on a later load or after old clients close, following the normal lifecycle.
+
+### Installation behavior
+
+Android/Chromium: **Instalar el álbum** appears near the footer only after the browser emits `beforeinstallprompt`, the page has loaded and the welcome dialog is closed. The native prompt is opened only on an explicit click. Acceptance, `appinstalled` or standalone mode hides the action. Declining/dismissing suppresses it for the session.
+
+iPhone/iPad: Safari outside standalone mode gets a small footer hint, **Compartir → Añadir a pantalla de inicio**, after the welcome closes. Desktop-mode iPad Safari is recognized through touch capability. In-app browsers and alternative iOS browser UAs are excluded from this Safari-specific hint. **Ahora no** stores `chas:pwa-install-dismissed:v1` in sessionStorage; restricted storage still permits in-memory dismissal. The site cannot inspect whether an iOS app is installed separately while Safari remains open; instructions are always suppressed when actually running standalone (`navigator.standalone` or display-mode media query).
+
+### Exact manual checks after deployment
+
+**Android / Chrome**
+
+1. Open the deployed **HTTPS root URL** in Chrome, with internet access. Complete the birthday welcome. Browse the album, then look near the footer for **Instalar el álbum** once Chrome considers installation available. Browser eligibility/timing varies; the Chrome menu's **Install app / Add to Home screen** is also available when supported. No install button should be manufactured without an available browser event.
+2. Tap the install action, accept Chrome's prompt, then launch **Chas** from the home screen. Verify the correct photo icon and standalone window without normal browser navigation chrome. The install CTA must be absent. Test a named/anonymous message, photo comment, guest photo, voice message and celebration intentionally if real production writes are desired.
+3. Open the site in an ordinary browser tab again. Test declining the install prompt when offered; there should be no repeated prompt in that session. Existing birthday welcome/session behavior must remain independent.
+
+**iPhone / iPad / Safari**
+
+1. Open the deployed HTTPS URL in **Safari**. Finish the welcome, find the subtle footer guidance and switch languages to check that it translates. **Ahora no** should hide it during the current Safari session.
+2. Use Safari's **Share → Add to Home Screen**, confirm **Chas** and add it. If iOS offers an **Open as Web App** option, leave it enabled. Launch the home-screen icon and verify the standalone appearance, correct icon and absence of install guidance.
+3. Test portrait/landscape, the bottom navigation, dialogs, microphone permission, recording and saved playback. Repeat on an iPad in desktop browsing mode. Native installation and permissions need a real device; a desktop UA simulation is not a substitute.
+
+**DevTools / offline / updates**
+
+1. In Chrome DevTools → **Application → Manifest**, inspect identity, scope, start URL, display mode, icon previews and maskable safe area. Resolve any installability errors reported by that browser. Under **Application → Service Workers**, verify `/sw.js`, root scope and activated status. Under **Cache Storage**, inspect the two `chas-album-*` caches: there must be no Supabase/CDN URLs or guest records/media.
+2. Load once online and wait for the worker to activate (`await navigator.serviceWorker.ready` in the console). Visit a few original photos. In DevTools Network, choose **Offline**, then reload. The basic album/hero and offline notice should appear; only images previously saved by the worker are expected to display. Try submitting a draft: it must remain after the friendly error, without a false success. Restore connectivity and reload; nothing should be submitted automatically.
+3. Switch all five languages with the offline notice or install guidance visible. Verify translated labels and unchanged guest content/drafts. For a fresh installation-hint test only, run `sessionStorage.removeItem('chas:pwa-install-dismissed:v1')` and reload. This does not clear the birthday welcome flag.
+4. On a staging deployment, change a harmless static asset and bump `VERSION` in `sw.js`. With an old page open, use `await (await navigator.serviceWorker.getRegistration()).update()` or DevTools **Update**. The new worker should wait and the open draft should remain. Reload normally: the waiting worker should activate, current static content should load and old app caches should disappear. Never clear caches/unregister on a visitor's behalf. DevTools **Update on reload** can override normal lifecycle behavior; turn it off when checking the actual update flow.
+5. Recheck live Supabase features with Network inspection: reads go to Supabase, deliberate submissions make their ordinary network requests, and none appear in the service worker caches. Manual production submissions are real; automated tests below do not create any.
+
+### Automated verification
+
+Run `node --test tests/*.test.cjs` for the full suite. The **15 new PWA tests** cover manifest/PNG dimensions and references, cache asset completeness, activation cleanup, waiting updates, API/mutation bypass, network-first/offline fallback, cache limits/storage failures, safe registration, Android CTA states, iOS/iPad hints/dismissal, standalone detection, connection feedback and all five translation catalogues. They use mocks and never mutate Supabase.
+
+Chromium checks additionally parsed the manifest, loaded all icons, activated the real worker, reopened the cached shell offline, verified a failed offline submission retains its draft, translated the offline notice, checked no reconnect replay, and simulated a v2 release activating on the next load while preserving the previous page's draft. Android prompt/iOS UA tests exercise the UI, not actual OS installation. No browser tooling or runtime dependencies were added to the repository.
+
+Platform references: [MDN: install prompt event](https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeinstallprompt_event), [WebKit: Home Screen web apps and manifest display](https://webkit.org/blog/13878/), [web.dev: worker lifecycle and waiting updates](https://web.dev/articles/service-worker-lifecycle).
+
+Final verification for this PWA change: **105/105 tests passed** (90 existing + 15 PWA), all JavaScript syntax checks and `git diff --check` passed. Chromium completed **8 PWA checks and 13 existing-flow check groups**, with zero uncaught page exceptions, zero overflow cases across the 25 language/viewport combinations, and zero axe violations in the four sampled views. All browser writes were intercepted; no real Supabase mutations occurred.
+
+Photo-icon revision: manifest, Apple metadata and shell-cache references now point to the photo-specific filenames. Only the cache version was bumped to v2; service worker strategy, Supabase, install logic and translations remain unchanged.
