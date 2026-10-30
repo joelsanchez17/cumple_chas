@@ -156,14 +156,14 @@ test('loads only the selected photo, renders literal text and hides anonymous id
   assert.equal(cards[0].children[0].textContent, '<script>text</script>');
   assert.equal(cards[0].children[1].textContent, '<img>');
   assert.equal(cards[1].children[1].textContent, 'Anónimo');
-  assert.match(fixture.el['photo-context-tag'].textContent, /Hay chisme/);
+  assert.match(fixture.el['photo-context-tag'].textContent, /Ya hay comentarios/);
 });
 
 test('empty state is honest and has no fabricated counts', async () => {
   const fixture = setup(); await fixture.open(A);
   assert.equal(fixture.el['comments-list'].children.length, 0);
   assert.match(fixture.el['comments-status'].textContent, /Todavía no hay comentarios/);
-  assert.equal(fixture.el['photo-context-tag'].textContent, 'Esta foto necesita contexto…');
+  assert.equal(fixture.el['photo-context-tag'].textContent, 'Tu mirada también cuenta');
 });
 
 test('validates empty content, named signatures and length before sending', async () => {
@@ -172,7 +172,7 @@ test('validates empty content, named signatures and length before sending', asyn
   const el = fixture.el;
   el['comment-content'].value = '   ';
   await el['comment-form'].fire('submit');
-  assert.match(el['comment-status'].textContent, /Escribe el contexto/);
+  assert.match(el['comment-status'].textContent, /Escribe un comentario/);
   el['comment-content'].value = 'Hola'; el['comment-name'].value = '   ';
   await el['comment-form'].fire('submit');
   assert.match(el['comment-status'].textContent, /Escribe tu nombre/);

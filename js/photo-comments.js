@@ -64,7 +64,7 @@
     let error;
     if (!content) {
       input = contentInput;
-      error = 'Escribe el contexto de esta foto antes de enviar.';
+      error = 'Escribe un comentario antes de enviar.';
     } else if (content.length > 1000) {
       input = contentInput;
       error = 'Tu comentario puede tener hasta 1000 caracteres.';
@@ -114,7 +114,7 @@
     list.setAttribute('aria-busy', 'true');
     refreshButton.disabled = true;
     moreButton.disabled = true;
-    status(listStatus, 'Buscando el contexto…');
+    status(listStatus, 'Cargando los comentarios…');
     try {
       const rows = await window.chasPhotoCommentsApi.read(photoId, offset);
       if (generation !== readGeneration || activePhotoId !== photoId) return;
@@ -126,14 +126,14 @@
       rows.filter((row) => row.photo_id === photoId).forEach((comment) => list.append(commentCard(comment)));
       loadedCount += rows.length;
       moreButton.hidden = rows.length < window.chasPhotoCommentsApi.pageSize;
-      contextTag.textContent = list.children.length ? 'Hay chisme sobre esta foto 👀' : 'Esta foto necesita contexto…';
-      status(listStatus, list.children.length ? '' : 'Todavía no hay comentarios en esta foto. ¿Empiezas tú?');
+      contextTag.textContent = list.children.length ? 'Ya hay comentarios por aquí' : 'Tu mirada también cuenta';
+      status(listStatus, list.children.length ? '' : 'Todavía no hay comentarios. ¿Quieres dejar el primero?');
     } catch (error) {
       if (generation !== readGeneration || activePhotoId !== photoId) return;
       console.error('Could not read photo comments:', error);
       status(listStatus, afterSend
         ? 'Tu comentario se guardó, pero no pudimos actualizar la lista. Pulsa “Actualizar”; no hace falta enviarlo otra vez.'
-        : 'No pudimos cargar el contexto de esta foto. Revisa tu conexión y pulsa “Actualizar”.', 'error');
+        : 'No pudimos cargar los comentarios. Revisa tu conexión y pulsa “Actualizar”.', 'error');
     } finally {
       if (generation === readGeneration && activePhotoId === photoId) {
         list.setAttribute('aria-busy', 'false');
@@ -149,7 +149,7 @@
     list.replaceChildren();
     loadedCount = 0;
     moreButton.hidden = true;
-    contextTag.textContent = 'Esta foto necesita contexto…';
+    contextTag.textContent = 'Tu mirada también cuenta';
     status(listStatus, '');
     renderForm();
     if (activePhotoId) loadComments();
@@ -191,7 +191,7 @@
       await window.chasPhotoCommentsApi.create(payload);
       saved = true;
       Object.assign(state, { content: '', name: '', anonymous: false });
-      feedback(state, '¡Contexto guardado! Gracias por sumar tu versión. ♡', 'success');
+      feedback(state, '¡Comentario guardado! Gracias por dejarme unas palabras. ♡', 'success');
     } catch (error) {
       console.error('Could not send photo comment:', error);
       feedback(state, 'No pudimos confirmar el envío. Tu texto sigue aquí. Revisa la conexión y actualiza los comentarios antes de intentarlo otra vez.', 'error');

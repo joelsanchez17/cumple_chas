@@ -48,7 +48,7 @@ function memoryCard(item, position) {
   title.textContent = item.title;
   const hint = document.createElement('span');
   hint.className = 'memory-hint';
-  hint.textContent = item.origin === 'guest' ? `Por ${item.uploaderLabel}` : 'Esta foto necesita contexto…';
+  hint.textContent = item.origin === 'guest' ? `Por ${item.uploaderLabel}` : '¿Qué te nace decir?';
   button.append(frame, title, hint);
   article.append(button);
   return article;
