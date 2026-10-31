@@ -183,8 +183,9 @@
         </article>
         <div class="party-conversation">
           <article class="party-question-card" id="party-question-card" aria-labelledby="party-game-title">
-            <div class="party-game-heading"><div><p class="eyebrow">CON CARIÑO, SIEMPRE</p><h3 id="party-game-title">Chisme o verdad</h3></div><figure class="serious-chas"><img src="assets/images/chas/chas-serious.jpeg" width="640" height="810" loading="lazy" alt="Chas mirando a cámara con expresión seria"><figcaption class="handwritten">te leo 👀</figcaption></figure></div>
+            <div class="party-game-heading"><div><p class="eyebrow">CON CARIÑO, SIEMPRE</p><h3 id="party-game-title">Chisme o verdad</h3></div><figure class="serious-chas"><img src="assets/images/chas/chas-serious.jpeg" width="640" height="810" loading="lazy" alt="Chas mirando a cámara con expresión seria"><figcaption class="handwritten">te leo</figcaption></figure></div>
             <p id="party-prompt" class="party-prompt" aria-live="polite"></p>
+            <button id="party-next-question-top" class="text-button party-prompt-change" type="button" disabled>Otra pregunta ↝</button>
             <form id="party-answer-form" novalidate>
               <label for="party-answer">Lo que te nazca</label><textarea id="party-answer" name="answer" rows="3" maxlength="1000" placeholder="Acá va tu versión…" aria-describedby="party-answer-help party-submit-status" required></textarea>
               <div class="signature-row"><label for="party-name">Con cariño,<input id="party-name" name="name" maxlength="50" autocomplete="given-name" placeholder="Tu nombre" required aria-describedby="party-anonymity party-submit-status"></label><label class="checkbox-label"><input id="party-anonymous" name="is_anonymous" type="checkbox"> Anónimo</label></div>

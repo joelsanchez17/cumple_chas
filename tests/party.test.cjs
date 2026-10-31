@@ -174,6 +174,7 @@ test('publishing validates, locks double submits, resets on success and reloads 
   await f.el['party-answer-form'].fire('submit');
   assert.equal(writes.length, 1); assert.equal(writes[0].name, null); assert.equal(writes[0].is_anonymous, true);
   assert.equal(f.el['party-next-question'].disabled, true);
+  assert.equal(f.el['party-next-question-top'].disabled, true);
   resolve(); await pending;
   assert.equal(f.el['party-answer'].value, '');
   assert.equal(f.el['party-submit-status'].dataset.state, 'success');
@@ -222,7 +223,7 @@ test('changing questions retains the previous draft and never repeats the same p
   const f = setup();
   const original = f.el['party-prompt'].textContent;
   f.el['party-answer'].value = 'My unsent memory';
-  await f.el['party-next-question'].fire('click');
+  await f.el['party-next-question-top'].fire('click');
   assert.notEqual(f.el['party-prompt'].textContent, original);
   assert.equal(f.el['party-answer'].value, '');
   // Route to the original prompt deterministically through the configurable list.

@@ -993,11 +993,11 @@ window.chasTranslations = Object.freeze({
     "zh-CN": "Chas 一本正经地看着镜头"
   },
   "copy.c142": {
-    "es": "te leo 👀",
-    "en": "I'm reading 👀",
-    "de": "ich lese mit 👀",
-    "pt": "tô lendo 👀",
-    "zh-CN": "我看着呢 👀"
+    "es": "te leo",
+    "en": "I'm reading",
+    "de": "ich lese mit",
+    "pt": "tô lendo",
+    "zh-CN": "我看着呢"
   },
   "copy.c143": {
     "es": "Lo que te nazca",

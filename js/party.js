@@ -13,7 +13,7 @@
   const nameInput = get('party-name');
   const anonymousInput = get('party-anonymous');
   const submitButton = get('party-submit');
-  const nextQuestion = get('party-next-question');
+  const nextQuestions = [get('party-next-question-top'), get('party-next-question')];
   const submitStatus = get('party-submit-status');
   const readStatus = get('party-read-status');
   const savedCard = get('party-saved-answer');
@@ -40,7 +40,7 @@
     nameInput.disabled = sending || anonymousInput.checked;
     nameInput.required = !anonymousInput.checked;
     submitButton.disabled = sending;
-    nextQuestion.disabled = sending;
+    nextQuestions.forEach((button) => { button.disabled = sending; });
     submitButton.textContent = sending ? 'Publicando…' : 'Publicar mi respuesta ↗';
     form.setAttribute('aria-busy', String(sending));
   }
@@ -115,7 +115,7 @@
         break;
     }
   });
-  nextQuestion.addEventListener('click', () => changePrompt(tools.chooseOther(tools.prompts, prompt.id)));
+  nextQuestions.forEach((button) => button.addEventListener('click', () => changePrompt(tools.chooseOther(tools.prompts, prompt.id))));
   anonymousInput.addEventListener('change', () => { nameInput.removeAttribute('aria-invalid'); status(submitStatus, ''); updateForm(); });
   [answerInput, nameInput].forEach((input) => input.addEventListener('input', () => { input.removeAttribute('aria-invalid'); status(submitStatus, ''); }));
   function displayAnswer() {

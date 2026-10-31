@@ -2552,7 +2552,10 @@ html.party-welcome-open {
   font-family:var(--serif);
   font-size:25px;
   line-height:1.35;
-  margin:25px 0 20px;
+  margin:25px 0 4px;
+}
+.party-prompt-change {
+  margin-bottom:8px;
 }
 #party-answer-form>label {
   font-size:11px;
