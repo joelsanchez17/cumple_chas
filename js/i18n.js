@@ -2,7 +2,7 @@
 
 (() => {
   const catalogue = window.chasTranslations;
-  const languages = ['es', 'en', 'de', 'pt', 'zh-CN'];
+  const languages = ['es', 'en', 'fr', 'de', 'pt', 'zh-CN'];
   const preferenceKey = 'chas:language';
   const textBindings = new WeakMap();
   const attributeBindings = new WeakMap();

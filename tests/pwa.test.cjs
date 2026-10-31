@@ -164,9 +164,19 @@ test('offline notice follows connection state without any offline submission que
   const f = ui(); assert.equal(f.elements['connection-note'].hidden, true); f.navigator.onLine = false; await f.window.fire('offline'); assert.equal(f.elements['connection-note'].hidden, false); f.navigator.onLine = true; await f.window.fire('online'); assert.equal(f.elements['connection-note'].hidden, true);
 });
 
-test('all PWA keys have complete translations in five languages', () => {
-  const context = vm.createContext({ window: {} }); vm.runInContext(source('js/translations.js'), context);
-  for (const key of ['pwa.offline', 'pwa.label', 'pwa.install', 'pwa.ios', 'pwa.dismiss', 'pwa.error', 'pwa.android.button', 'pwa.android.help', 'pwa.ios.safari']) for (const locale of ['es', 'en', 'de', 'pt', 'zh-CN']) assert.ok(context.window.chasTranslations[key][locale]);
+test('all PWA keys have complete translations in six languages', () => {
+  const context = vm.createContext({ window: {} }); vm.runInContext(source('js/translations.js'), context); vm.runInContext(source('js/translations-fr.js'), context);
+  for (const key of ['pwa.offline', 'pwa.label', 'pwa.install', 'pwa.ios', 'pwa.dismiss', 'pwa.error', 'pwa.android.button', 'pwa.android.help', 'pwa.ios.safari']) for (const locale of ['es', 'en', 'fr', 'de', 'pt', 'zh-CN']) assert.ok(context.window.chasTranslations[key][locale]);
+});
+
+test('Spotify track embed is lazy, compact and allowed by the conservative Netlify headers', () => {
+  const html = source('index.html');
+  const headers = source('_headers');
+  assert.match(html, /<iframe[^>]+src="https:\/\/open\.spotify\.com\/embed\/track\/3sK8wGT43QFpWrvNQsrQya"[^>]+loading="lazy"/);
+  assert.match(html, /class="spotify-embed"/);
+  assert.doesNotMatch(html, /open\.spotify\.com\/embed[^>]+autoplay/);
+  assert.match(headers, /Permissions-Policy: camera=\(\), geolocation=\(\), microphone=\(self\)/);
+  assert.doesNotMatch(headers, /Content-Security-Policy:/i);
 });
 
 

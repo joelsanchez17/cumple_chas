@@ -1,14 +1,14 @@
 'use strict';
 
 // Bump VERSION whenever changing the shell or its asset list for a release.
-const VERSION = 'v4';
+const VERSION = 'v5';
 const PREFIX = 'chas-album-';
 const SHELL_CACHE = `${PREFIX}shell-${VERSION}`;
 const IMAGE_CACHE = `${PREFIX}images-${VERSION}`;
 const MAX_IMAGES = 21;
 const SHELL = [
   '/', '/index.html', '/manifest.webmanifest', '/css/style.css',
-  '/js/translations.js', '/js/i18n.js', '/js/pwa.js', '/js/photos.js',
+  '/js/translations.js', '/js/translations-fr.js', '/js/i18n.js', '/js/pwa.js', '/js/photos.js',
   '/js/photo-upload.js', '/js/app.js', '/js/supabase-client.js',
   '/js/celebration.js', '/js/guest-photos.js', '/js/messages.js',
   '/js/photo-comments.js', '/js/voice-recorder.js', '/js/voice-data.js',

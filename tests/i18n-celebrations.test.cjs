@@ -92,22 +92,23 @@ function setup({ preference, denied = false } = {}) {
   const window = { NodeFilter: { SHOW_ELEMENT: 1, SHOW_TEXT: 4 }, localStorage: { getItem(key) { if (denied) throw Error('denied'); return storage.get(key); }, setItem(key, value) { if (denied) throw Error('denied'); storage.set(key, value); } } };
   const context = vm.createContext({ window, document: tree.document, MutationObserver: tree.MutationObserver, queueMicrotask, console });
   vm.runInContext(source('js/translations.js'), context);
+  vm.runInContext(source('js/translations-fr.js'), context);
   vm.runInContext(source('js/i18n.js'), context);
   return { ...tree, window, context, storage, api: window.chasI18n };
 }
 
-test('Spanish is the default, independent of browser locale, and all five locales are complete', () => {
+test('Spanish is the default, independent of browser locale, and all six locales are complete', () => {
   const f = setup();
   assert.equal(f.api.language, 'es'); assert.equal(f.document.documentElement.lang, 'es');
   assert.equal(f.api.t('nav.home'), 'Inicio');
   for (const [key, row] of Object.entries(f.window.chasTranslations)) {
-    for (const locale of ['es', 'en', 'de', 'pt', 'zh-CN']) assert.ok(typeof row[locale] === 'string' && row[locale].length, `${key}/${locale}`);
+    for (const locale of ['es', 'en', 'fr', 'de', 'pt', 'zh-CN']) assert.ok(typeof row[locale] === 'string' && row[locale].length, `${key}/${locale}`);
   }
 });
 
 test('switching updates DOM, HTML lang and localStorage; a future visit restores preference', async () => {
   const f = setup();
-  for (const [locale, home] of [['en', 'Home'], ['de', 'Start'], ['pt', 'Início'], ['zh-CN', '首页'], ['es', 'Inicio']]) {
+  for (const [locale, home] of [['en', 'Home'], ['fr', 'Accueil'], ['de', 'Start'], ['pt', 'Início'], ['zh-CN', '首页'], ['es', 'Inicio']]) {
     const picker = f.document.getElementById('language-select'); picker.value = locale; await picker.fire('change'); await tick();
     assert.equal(f.api.t('nav.home'), home);
     assert.equal(f.document.documentElement.lang, locale);

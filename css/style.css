@@ -414,6 +414,27 @@ h1>span:first-of-type {
   font-size:11px;
   margin-top:35px;
 }
+.about-soundtrack {
+  width:min(100%,520px);
+  margin:34px auto 0;
+  padding:12px;
+  background:#f7eee1;
+  border:1px solid #e9dbca;
+  box-shadow:5px 6px 0 #3823340c;
+  transform:rotate(.4deg);
+}
+.about-soundtrack .handwritten {
+  color:var(--berry);
+  font-size:22px;
+  margin:0 0 8px 4px;
+}
+.spotify-embed {
+  display:block;
+  width:100%;
+  height:152px;
+  border:0;
+  border-radius:12px;
+}
 .about-footnote span {
   color:var(--teal);
   padding-right:5px;
@@ -1312,6 +1333,10 @@ html.dialog-open {
     font-size:10px;
     margin-top:27px;
     padding-inline:10px;
+  }
+  .about-soundtrack {
+    margin-top:28px;
+    padding:8px;
   }
   .album-section {
     padding-top:40px;

@@ -2944,5 +2944,19 @@ window.chasTranslations = Object.freeze({
     "de": "Öffne dieses Album in Safari und tippe auf Teilen → Zum Home-Bildschirm.",
     "pt": "Abra este álbum no Safari e toque em Compartilhar → Adicionar à Tela de Início.",
     "zh-CN": "用 Safari 打开相册，然后轻点“分享”→“添加到主屏幕”。"
+  },
+  "about.spotify": {
+    "es": "Una que no puede faltar",
+    "en": "One that has to be on the playlist",
+    "de": "Ein Song, der nicht fehlen darf",
+    "pt": "Uma que não pode faltar",
+    "zh-CN": "歌单里不能少的一首"
+  },
+  "about.spotifyTitle": {
+    "es": "Spotify: DtMF — Bad Bunny",
+    "en": "Spotify: DtMF — Bad Bunny",
+    "de": "Spotify: DtMF — Bad Bunny",
+    "pt": "Spotify: DtMF — Bad Bunny",
+    "zh-CN": "Spotify：DtMF — Bad Bunny"
   }
 });
