@@ -82,7 +82,7 @@
       selected: formatBytes(item.file.size),
       compressing: 'Preparando…',
       uploading: 'Subiendo…',
-      registering: 'Guardando en el álbum…',
+      registering: 'Guardando entre los recuerdos compartidos…',
       success: `Lista · ${formatBytes(item.compressedSize)}`,
       error: item.error || 'No se pudo subir',
     }[item.status] || '';
@@ -224,7 +224,7 @@
       return row;
     } catch (error) {
       console.error('Photo metadata insert failed after Storage upload; an orphaned object may need administrative cleanup.', { storagePath, error });
-      const failure = new Error('La foto llegó, pero no pudimos sumarla al álbum. No vuelvas a enviarla; avísanos para revisarla.');
+      const failure = new Error('La foto llegó, pero no pudimos sumarla a los recuerdos compartidos. No vuelvas a enviarla; avísanos para revisarla.');
       failure.noRetry = true;
       throw failure;
     }

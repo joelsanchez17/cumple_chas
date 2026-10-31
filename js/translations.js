@@ -237,11 +237,11 @@ window.chasTranslations = Object.freeze({
     "zh-CN": "喜欢旅行、跳舞，也喜欢认识新朋友。"
   },
   "copy.c034": {
-    "es": "Después, ya veremos qué fotos salen.",
-    "en": "We'll see what photos come out of it.",
-    "de": "Mal sehen, welche Fotos dabei entstehen.",
-    "pt": "Depois a gente vê as fotos que saem.",
-    "zh-CN": "至于会留下什么照片，就到时候再看吧。"
+    "es": "Si suena CA7RIEL & Paco Amoroso, ya estoy en la pista.",
+    "en": "If CA7RIEL & Paco Amoroso come on, I'm already on the dance floor.",
+    "de": "Wenn CA7RIEL & Paco Amoroso laufen, bin ich schon auf der Tanzfläche.",
+    "pt": "Se toca CA7RIEL & Paco Amoroso, já estou na pista.",
+    "zh-CN": "要是放起 CA7RIEL & Paco Amoroso，我已经在舞池里了。"
   },
   "copy.c035": {
     "es": "¿vamos? vamos.",
@@ -1091,11 +1091,11 @@ window.chasTranslations = Object.freeze({
     "zh-CN": "最喜欢的回忆里，总有喜欢的人。"
   },
   "copy.c156": {
-    "es": "Hecho con ayuda de: Juanse, Miguel, Ale, Seba y Joel",
-    "en": "Made with help from: Juanse, Miguel, Ale, Seba and Joel",
-    "de": "Mit Hilfe von: Juanse, Miguel, Ale, Seba und Joel",
-    "pt": "Feito com a ajuda de: Juanse, Miguel, Ale, Seba e Joel",
-    "zh-CN": "感谢 Juanse、Miguel、Ale、Seba 和 Joel 的帮助"
+    "es": "Hecho con ayuda de: Juanse, Miguel, Ale, Carla, Seba y Joel",
+    "en": "Made with help from: Juanse, Miguel, Ale, Carla, Seba and Joel",
+    "de": "Mit Hilfe von: Juanse, Miguel, Ale, Carla, Seba und Joel",
+    "pt": "Feito com a ajuda de: Juanse, Miguel, Ale, Carla, Seba e Joel",
+    "zh-CN": "感谢 Juanse、Miguel、Ale、Carla、Seba 和 Joel 的帮助"
   },
   "copy.c157": {
     "es": "PASA, ESTÁS ENTRE MI GENTE",
@@ -1658,11 +1658,11 @@ window.chasTranslations = Object.freeze({
     "zh-CN": "正在上传…"
   },
   "copy.c237": {
-    "es": "Guardando en el álbum…",
-    "en": "Saving to the album…",
-    "de": "Wird im Album gespeichert…",
-    "pt": "Salvando no álbum…",
-    "zh-CN": "正在保存到相册…"
+    "es": "Guardando entre los recuerdos compartidos…",
+    "en": "Saving among the shared memories…",
+    "de": "Wird bei den geteilten Erinnerungen gespeichert…",
+    "pt": "Salvando entre as lembranças compartilhadas…",
+    "zh-CN": "正在保存到大家分享的回忆中…"
   },
   "copy.c238": {
     "es": "Agregar contexto (opcional)",
@@ -1693,11 +1693,11 @@ window.chasTranslations = Object.freeze({
     "zh-CN": "照片上传失败，请检查网络后重试。"
   },
   "copy.c242": {
-    "es": "La foto llegó, pero no pudimos sumarla al álbum. No vuelvas a enviarla; avísanos para revisarla.",
-    "en": "The photo arrived, but couldn't be added to the album. Don't resend it; let us know so we can check.",
-    "de": "Das Foto ist angekommen, konnte aber nicht ins Album übernommen werden. Nicht erneut senden; sag uns bitte Bescheid.",
-    "pt": "A foto chegou, mas não entrou no álbum. Não envie de novo; avise para conferirmos.",
-    "zh-CN": "照片已上传，但未能加入相册。请勿重复发送，告诉我们来检查。"
+    "es": "La foto llegó, pero no pudimos sumarla a los recuerdos compartidos. No vuelvas a enviarla; avísanos para revisarla.",
+    "en": "The photo arrived, but couldn't be added to the shared memories. Don't resend it; let us know so we can check.",
+    "de": "Das Foto ist angekommen, konnte aber nicht zu den geteilten Erinnerungen hinzugefügt werden. Nicht erneut senden; sag uns bitte Bescheid.",
+    "pt": "A foto chegou, mas não entrou nas lembranças compartilhadas. Não envie de novo; avise para conferirmos.",
+    "zh-CN": "照片已上传，但未能加入大家分享的回忆。请勿重复发送，告诉我们来检查。"
   },
   "copy.c243": {
     "es": "Las que fallaron por conexión siguen aquí para reintentar.",
